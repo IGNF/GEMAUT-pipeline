@@ -811,7 +811,7 @@ if __name__ == "__main__":
     try:
 
         start_time = time.time()
-        start_time = time.time()
+
         # Création du parseur d'arguments avec une description et un épilogue pour l'exemple de commande
         parser = argparse.ArgumentParser(
             description='GEMAUT - Génération de Modèles Automatiques de Terrain',
