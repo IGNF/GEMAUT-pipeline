@@ -1047,14 +1047,14 @@ def fill_holes_simple_OLD(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
 def fill_holes_simple_NEW(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
     with rasterio.open(chemMNS_IN) as src:
         mns = src.read(1)  # Lecture de la première bande dans un tableau NumPy
-
+        print('src.read')
         # Masque uniquement des pixels no_data_int pour les trous à combler
         mask_invalid = (mns == no_data_int)
-        
+        print('invalid identifiés')
         # Identifier les coordonnées des pixels valides (hors no_data_int) et des trous (no_data_int)
         valid_indices = np.argwhere(~mask_invalid & (mns != no_data_ext))  # Coordonnées des pixels valides (non NoData)
         hole_indices = np.argwhere(mask_invalid)                           # Coordonnées des trous (no_data_int uniquement)
-
+        print('3')
         # Extraire les valeurs des pixels valides (hors no_data_int et no_data_ext)
         valid_values = mns[valid_indices[:, 0], valid_indices[:, 1]]
 
@@ -1087,23 +1087,31 @@ def fill_holes_simple_NEW(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
 def fill_holes_simple(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
     with rasterio.open(chemMNS_IN) as src:
         mns = src.read(1)  # Lecture de la première bande dans un tableau NumPy
+        print('src.read')
 
         # Masque pour les pixels `no_data_int` uniquement
         mask_invalid = (mns == no_data_int)
+        print('invalid identifiés')
         
         # Coordonnées des pixels valides et trous
         valid_indices = np.argwhere(~mask_invalid & (mns != no_data_ext))
         hole_indices = np.argwhere(mask_invalid)
         valid_values = mns[valid_indices[:, 0], valid_indices[:, 1]]
+        print('3')
 
-        # Utiliser LinearNDInterpolator pour une interpolation plus rapide
-        interpolator = LinearNDInterpolator(valid_indices, valid_values)
-        interpolated_values = interpolator(hole_indices)
-
-        # Remplir les trous avec les valeurs interpolées sans boucle
-        mns_filled = mns.copy()
-        valid_hole_indices = ~np.isnan(interpolated_values)
-        mns_filled[hole_indices[valid_hole_indices, 0], hole_indices[valid_hole_indices, 1]] = interpolated_values[valid_hole_indices]
+        if hole_indices.size == 0:
+            print("Aucun trou détecté, aucune interpolation nécessaire.")
+            mns_filled = mns.copy()
+        else:
+            # Utiliser LinearNDInterpolator
+            interpolator = LinearNDInterpolator(valid_indices, valid_values)
+            interpolated_values = interpolator(hole_indices)
+            print("fill_holes_simple - interpolation")
+            # Remplir les trous avec les valeurs interpolées
+            mns_filled = mns.copy()
+            valid_hole_indices = ~np.isnan(interpolated_values)
+            mns_filled[hole_indices[valid_hole_indices, 0], hole_indices[valid_hole_indices, 1]] = interpolated_values[valid_hole_indices]
+            print("fill_holes_simple - fill")
 
         # Sauvegarde du résultat
         out_meta = src.meta.copy()
