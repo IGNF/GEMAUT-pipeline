@@ -48,7 +48,7 @@ def run_task(cmd):
     return True
 
 ################################################################################################################################
-def run_saga_par_dalle_parallel(RepIN,RepOUT,chem_pente_par_dallle,taille_dallage,rayon,no_data,iNbreCPU):
+def run_saga_par_dalle_parallel_avec_carte_pentes(RepIN,RepOUT,chem_pente_par_dallle,taille_dallage,rayon,no_data,iNbreCPU):
 
     liste_pixel_coords=[]
     liste_images=[]
@@ -90,6 +90,40 @@ def run_saga_par_dalle_parallel(RepIN,RepOUT,chem_pente_par_dallle,taille_dallag
                 pente_local = band_data[row, col]
                 # cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente_local} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE 15 -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
+                logger.info(f"{cmd_saga_1_dalle}")
+                tasks.append(cmd_saga_1_dalle)
+                logger.info(f"cmd_saga_1_dalle {cmd_saga_1_dalle}")
+            else:
+                #on copie directement la dalle MNS no_data dans le ground.tif, ça sert juste pour l'assemblage plus tard [implémentation très sale]
+                shutil.copyfile(chem_img, chem_ground_tif) 
+
+    #run_task_sans_SORTIEMESSAGE
+    with Pool(processes=iNbreCPU) as pool:
+        list(tqdm(pool.imap_unordered(run_task_sans_SORTIEMESSAGE, tasks), total=len(tasks), desc="Lancement de SAGA unitaire en parallèle"))
+
+    return
+
+################################################################################################################################
+def run_saga_par_dalle_parallel(RepIN,RepOUT,rayon,no_data,pente,iNbreCPU):
+
+    tasks = []
+
+    for root, dirs, files in os.walk(RepIN):
+        for f in files:
+            #
+            # préparer / créer le dossier de sortie et l'ajouter à la liste
+            chem_rep_out=os.path.join(RepOUT,f[:-4])
+            if not os.path.isdir(chem_rep_out): os.mkdir(chem_rep_out)
+
+            chem_img=os.path.join(root,f)
+    
+            chem_ground=os.path.join(chem_rep_out,'ground.sdat')
+            chem_ground_tif=os.path.join(chem_rep_out,'ground.tif')
+            chem_non_ground=os.path.join(chem_rep_out,'non_ground.sdat')
+            #
+            if contient_donnees(chem_img, no_data):
+                # cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente_local} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
+                cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 logger.info(f"{cmd_saga_1_dalle}")
                 tasks.append(cmd_saga_1_dalle)
                 logger.info(f"cmd_saga_1_dalle {cmd_saga_1_dalle}")
@@ -249,7 +283,7 @@ def filtrer_pente(chem_pente, chem_pente_smooth, seuil_diff, chem_pente_filtree)
         # Lecture des données des rasters sous forme de matrices numpy
         data1 = src1.read(1)  # chem_pente
         data2 = src2.read(1)  # chem_pente_smooth
-        #toto
+        #
         # Calcul de la différence
         diff = data1 - data2 
         
@@ -337,9 +371,6 @@ def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_dat
 
     logger.info(f"[SAGA] Creer_image_binaire OK")
 
-
-
-
         # Raboutage_DALLAGE_SAGA(RepTra_OUT_SAGA_tmp_expand,chem_out_final_expand_tmp,iNbreCPU)
 
         # tasks_gdal = []
@@ -352,7 +383,6 @@ def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_dat
         #             tasks_gdal.append(cmd)
         #             logger.info(cmd)
                     
-
 ############################################################################################################
 def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,iNbreCPU):
     #
@@ -390,7 +420,6 @@ def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,
                     if file.startswith('ground') and file.endswith("tif"):
                         liste_files.append(os.path.join(root,file))
 
-        # "gdal_merge.py -n -99999 -a_nodata -99999  -o ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/RABOUTAGE_tmp/out_1.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_1/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_2/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_3/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_4/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_5/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_6/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_7/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_8/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_9/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_10/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_11/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_12/ground.tif ./RepTra/TOTO_pipeline/tmp/RepTra_SAGA/tmp/OUT_SAGA_tmp/DALLAGE_1_13/ground.tif"
         #rajouter un dossier de travail     
         output_file = os.path.join(RepTra_raboutage_tmp,f"out_{col+1}.tif")  
         cmd = f"gdal_merge.py -n -99999 -a_nodata -99999  -o {output_file} {' '.join(liste_files)} "
@@ -435,9 +464,8 @@ def parse_arguments():
     return parser.parse_args(sys.argv[1:])
 
 ############################################################################################################
-#def execute_main(args):
-#  main_saga_ground_extraction(chemMNS4SAGA,chemMASQUE,Chem_RepTra_SAGA,iNbreCPU,radius_saga,tile_saga,no_data_max)
-def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext, taille_voisinage=5, K=2, percentile=5, seuil_diff=15):
+#def main_saga_ground_extraction_avec_carte_pentes(args):
+def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext, taille_voisinage=5, K=2, percentile=5, seuil_diff=15):
     
     try:
 
@@ -482,7 +510,126 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
         #
         RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
         if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
-        run_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,chem_pente_par_dallle,taille_dallage,rayon,no_data_ext,iNbreCPU)
+        run_saga_par_dalle_parallel_avec_carte_pentes(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,chem_pente_par_dallle,taille_dallage,rayon,no_data_ext,iNbreCPU)
+        time_tmp = time.time()
+        duration_tmp = time_tmp - start_time
+        logger.info(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+
+        RepTra_OUT_SAGA_tmp_expand = os.path.expanduser(RepTra_OUT_SAGA_tmp)
+        chem_out_final_tmp=os.path.join(RepTra_tmp,'out_final_tmp.tif')
+        chem_out_final_expand_tmp  = os.path.expanduser(chem_out_final_tmp)
+        
+        # Créer la liste des tâches gdal
+        tasks_gdal = []
+        for root, dirs, files in os.walk(RepTra_OUT_SAGA_tmp_expand):
+            for f in files:
+                if f.startswith('ground') and f.endswith('sdat'):
+                    chem_in = os.path.join(root, f)
+                    chem_out = f"{chem_in[:-5]}.tif"
+                    cmd = f"gdal_translate {chem_in} {chem_out}"
+                    tasks_gdal.append(cmd)
+                    logger.info(cmd)
+        
+        # Utiliser le Pool de multiprocessing
+        # Utiliser imap_unordered pour traiter les commandes en parallèle
+        ## NE JAMAIS UTILISER OS.SYSTEM DANS LA PARALLELISATION >> results = list(tqdm(pool.imap_unordered(os.system, tasks_gdal), total=len(tasks_gdal), desc="Convertir les .sdat de SAGA en .tif"))
+        with Pool(processes=iNbreCPU) as pool:
+            list(tqdm(pool.imap_unordered(run_task_sans_SORTIEMESSAGE, tasks_gdal), total=len(tasks_gdal), desc="Convertir les .sdat de SAGA en .tif avec gdal_translate"))
+
+        time_tmp = time.time()
+        duration_tmp = time_tmp - start_time
+        logger.info(f"FIN Conversion des .sdat de SAGA en .tif en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+
+        RepTra_raboutage_tmp=os.path.join(RepTra_OUT_SAGA_tmp,'RABOUTAGE_tmp')
+
+        # 
+        if not os.path.isdir(RepTra_raboutage_tmp): 
+            os.mkdir(RepTra_raboutage_tmp)
+        else:
+            shutil.rmtree(RepTra_raboutage_tmp)
+            os.mkdir(RepTra_raboutage_tmp)
+        logger.info(f"RepTra_raboutage_tmp : {RepTra_raboutage_tmp}")
+
+        RepTra_raboutage_tmp_expand=  os.path.expanduser(RepTra_raboutage_tmp)
+
+        ############################################################################################################
+        Raboutage_DALLAGE_SAGA(RepTra_OUT_SAGA_tmp_expand,RepTra_raboutage_tmp_expand,chem_out_final_expand_tmp,iNbreCPU)
+    
+        ################################################
+        end_time=time.time()
+        
+        time_tmp = time.time()
+        duration_tmp = time_tmp - start_time
+        logger.info(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        #print(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        #
+        chem_out_final_expand  = os.path.expanduser(chem_out_final)
+        Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_data_ext)
+        
+        # Enregistrer l'heure de fin
+        end_time = time.time()
+        end_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(end_time))
+        # Calculer la durée
+        duration = end_time - start_time
+        logger.info(f"[SAGA] END - Programme terminé à : {end_time_str} - Durée d'exécution : {duration:.2f} secondes")
+
+        logger.info("[SAGA] Fin de main_saga_ground_extraction")
+#==================================================================================================
+# Gestion des exceptions
+#==================================================================================================
+    except (RuntimeError, TypeError, NameError):
+        print ("ERREUR: ", NameError)
+
+############################################################################################################
+#def main_saga_ground_extraction(args):
+def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext, taille_voisinage=5, K=2, percentile=5, seuil_diff=15):
+    
+    try:
+
+        logger.info("[SAGA] Démarrage de main_saga_ground_extraction")
+
+        # Enregistrer l'heure de départ
+        start_time = time.time()
+        start_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(start_time))
+        logger.info(f"[SAGA] Programme démarré à : {start_time_str}")
+        
+        # parametres du programme
+        logger.info(f"[SAGA] PARAMETRAGE: mns={chem_mns}, out={chem_out_final}, RepTra={RepTra}, rayon={rayon}, taille_dallage={taille_dallage}, cpu={iNbreCPU}")        
+        
+        RepTra_tmp=os.path.join(RepTra,"tmp")
+        if not os.path.isdir(RepTra): os.mkdir(RepTra)
+        if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
+
+        #
+        # chem_pente_filtree=os.path.join(RepTra_tmp,'pente_filtree.tif')
+        # Calculer_pente_filtree(chem_mns, RepTra_tmp, chem_pente_filtree, percentile, taille_voisinage, seuil_diff)
+
+        # time_tmp = time.time()
+        # duration_tmp = time_tmp - start_time
+        # logger.info(f"FIN Calcule de la carte des pentes & filtre - Durée d'exécution : {duration_tmp:.2f} secondes")        
+        # #
+        # chem_pente_par_dallle=os.path.join(RepTra_tmp,'pente_par_dallle.tif')
+        # Daller_pente(chem_pente_filtree,chem_pente_par_dallle, taille_dallage)
+        # time_tmp = time.time()
+        # duration_tmp = time_tmp - start_time
+        # logger.info(f"FIN Dallage des Pentes - Durée d'exécution : {duration_tmp:.2f} secondes") 
+
+        #
+        RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
+        if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
+        
+        #
+        Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, 'DALLAGE_')
+        time_tmp = time.time()
+        duration_tmp = time_tmp - start_time
+        logger.info(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes")         
+
+        #
+        RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
+        if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
+        #toto
+        run_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,rayon,no_data,no_data_ext,iNbreCPU)
+
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
         logger.info(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
