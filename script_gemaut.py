@@ -779,7 +779,6 @@ def RunGemoEnParallel_XING(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flamb
 		
         
     return
-
 #################################################################################################### 
 def RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_value, iNbreCPU):
     
@@ -788,19 +787,19 @@ def RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, n
     for x in range(NbreDalleX):
         for y in range(NbreDalleY):
             RepDalleXY=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y))
-                                
+            print(RepDalleXY)                            
             #fichier out mns
             ChemOUT_mns=os.path.join(RepDalleXY,"Out_MNS_%s_%s.tif"%(x,y))
-                
+            print(ChemOUT_mns)    
             #fichier out masque
             ChemOUT_masque=os.path.join(RepDalleXY,"Out_MASQUE_%s_%s.tif"%(x,y))
-                
+            print(ChemOUT_masque)    
             #fichier out masque
             ChemOUT_INIT=os.path.join(RepDalleXY,"Out_INIT_%s_%s.tif"%(x,y))
-                
+            print(ChemOUT_INIT)    
             #fichier out mnt
             ChemOUT_mnt=os.path.join(RepDalleXY,"Out_MNT_%s_%s.tif"%(x,y))
-            
+            print(ChemOUT_mnt)
             # if os.path.exists(ChemOUT_mns):
             if contient_donnees(ChemOUT_mns, no_data_value):
                 # cmd_unitaire="%s -i %s %s %s -XG:%2.5f:%2.5f:%s:30000 -o %s -n0 >> /dev/null 2>&1" %(cmdxingng_chem_complet,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,fsigma,flambda,norme,ChemOUT_mnt)
@@ -846,6 +845,26 @@ def Decoupe_dalle(args):
     """
     mns_file, masque_file, init_file, col_dalle, lig_dalle, x_offset, y_offset, l_dalle, h_dalle, no_data_value, RepTravail_tmp = args
 
+    print(' dans Decoupe_dalle ')
+    print(mns_file)
+    print(masque_file)
+    print(init_file)
+    print(col_dalle)
+    print(lig_dalle)
+    print(x_offset)
+    print(y_offset)
+    print(l_dalle)
+    print(h_dalle)
+    print(RepTravail_tmp)
+    print(' dans Decoupe_dalle ')    
+
+    try:
+        print('création rep ', RepTravail_tmp)
+        if not os.path.isdir(RepTravail_tmp): 
+            os.mkdir(RepTravail_tmp)
+    except Exception as e:
+        print(f"Erreur lors de la création du répertoire : {e}")
+
     # Lire les trois images avec rasterio
     with rasterio.open(mns_file) as mns_src, \
          rasterio.open(masque_file) as masque_src, \
@@ -882,6 +901,7 @@ def Decoupe_dalle(args):
                 dst.write(dalle, 1)
 
 #################################################################################################### 
+# Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
 def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleRecouvrement, no_data_value, RepTravail_tmp, iNbreCPU):
     """
     Traite trois grandes images (MNS, Masque, Initialisation) en découpant en dalles avec chevauchement,
@@ -894,6 +914,19 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
     :param no_data_value: Valeur représentant "no data" pour MNS.
     :param RepTravail_tmp: Répertoire temporaire où enregistrer les dalles traitées.
     """
+    #toto
+    #     if not os.path.isdir(RepTra): os.mkdir(RepTra)
+#     if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
+    print('-')
+    print(mns_file)
+    print(masque_file)
+    print(init_file)
+    print(taille_dalle)
+    print(iTailleRecouvrement)
+    print(no_data_value)
+    print(RepTravail_tmp)
+    print(iNbreCPU)
+    print('-')
 
     with rasterio.open(mns_file) as mns_src:
         largeur = mns_src.width
@@ -908,6 +941,9 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
         # Calculer le nombre de dalles avec recouvrement
         NbreDalleX = (largeur - iTailleRecouvrement + pas_x - 1) // pas_x
         NbreDalleY = (hauteur - iTailleRecouvrement + pas_y - 1) // pas_y
+
+        print('**** ',NbreDalleX)
+        print('**** ',NbreDalleY)
 
         # Créer une liste des paramètres pour chaque dalle avec un compteur d'index
         params = []
@@ -925,10 +961,14 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
                 # Ajouter les paramètres pour traiter cette dalle
                 params.append((mns_file, masque_file, init_file, x, y, x_offset, y_offset, l_bloc, h_bloc, no_data_value, RepTravail_tmp))
         
+        print('aqui')
         # Utiliser multiprocessing pour traiter les dalles en parallèle avec une barre de progression
         with Pool(processes=iNbreCPU) as pool:
             # Utiliser tqdm pour la barre de progression
-            results = list(tqdm(pool.imap_unordered(Decoupe_dalle, params), total=len(params), desc="Traitement des dalles"))
+            print('--------------------')
+            print(params)
+            print('--------------------')
+            results = list(tqdm(pool.imap_unordered(Decoupe_dalle, params), total=len(params), desc="- Traitement des dalles -"))
 
 ####################################################################################################
 def fill_holes_with_interpolation(chemMNS_IN, no_data_int, no_data_ext, e, weight_type, chemMNS_filled):
@@ -1047,14 +1087,14 @@ def fill_holes_simple_OLD(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
 def fill_holes_simple_NEW(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
     with rasterio.open(chemMNS_IN) as src:
         mns = src.read(1)  # Lecture de la première bande dans un tableau NumPy
-        print('src.read')
+        #print('src.read')
         # Masque uniquement des pixels no_data_int pour les trous à combler
         mask_invalid = (mns == no_data_int)
         print('invalid identifiés')
         # Identifier les coordonnées des pixels valides (hors no_data_int) et des trous (no_data_int)
         valid_indices = np.argwhere(~mask_invalid & (mns != no_data_ext))  # Coordonnées des pixels valides (non NoData)
         hole_indices = np.argwhere(mask_invalid)                           # Coordonnées des trous (no_data_int uniquement)
-        print('3')
+        
         # Extraire les valeurs des pixels valides (hors no_data_int et no_data_ext)
         valid_values = mns[valid_indices[:, 0], valid_indices[:, 1]]
 
@@ -1087,20 +1127,19 @@ def fill_holes_simple_NEW(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
 def fill_holes_simple(chemMNS_IN, no_data_int, no_data_ext, chemMNS_filled):
     with rasterio.open(chemMNS_IN) as src:
         mns = src.read(1)  # Lecture de la première bande dans un tableau NumPy
-        print('src.read')
+        #print('src.read')
 
         # Masque pour les pixels `no_data_int` uniquement
         mask_invalid = (mns == no_data_int)
-        print('invalid identifiés')
+        #print('invalid identifiés')
         
         # Coordonnées des pixels valides et trous
         valid_indices = np.argwhere(~mask_invalid & (mns != no_data_ext))
         hole_indices = np.argwhere(mask_invalid)
         valid_values = mns[valid_indices[:, 0], valid_indices[:, 1]]
-        print('3')
 
         if hole_indices.size == 0:
-            print("Aucun trou détecté, aucune interpolation nécessaire.")
+            #print("Aucun trou détecté, aucune interpolation nécessaire.")
             mns_filled = mns.copy()
         else:
             # Utiliser LinearNDInterpolator
@@ -1271,8 +1310,9 @@ def main():
         no_data_int=args.nodata_int     
         no_data_interne_mask=11 
         no_data_max=32768
-        radius_saga=50
-        tile_saga=50
+        radius_saga=100 
+        tile_saga=100
+        pente=15
         #taille_voisinage=5
         #K=2
         #percentile=5
@@ -1323,13 +1363,15 @@ def main():
             chemMASQUE=os.path.join(RepTravail,'MASQUE_compute.tif')
             if os.path.isfile(chemMASQUE):
                 os.remove(chemMASQUE)  # Supprimer le fichier
-                print(f"Le fichier {chemMASQUE} a été supprimé: il va être recalculé")
+                logger.info("Le fichier {chemMASQUE} a été supprimé: il va être recalculé")
+                #print(f"Le fichier {chemMASQUE} a été supprimé: il va être recalculé")
             else:
-                print(f"Le fichier {chemMASQUE} n'existe pas: il va être recalculé")
+                logger.info("Le fichier {chemMASQUE} n'existe pas: il va être recalculé")
+                #print(f"Le fichier {chemMASQUE} n'existe pas: il va être recalculé")
 
             # Appeler le script en utilisant subprocess
             try:
-                main_saga_ground_extraction(chemMNS4SAGA,chemMASQUE,Chem_RepTra_SAGA,iNbreCPU,radius_saga,tile_saga,no_data_max)
+                main_saga_ground_extraction(chemMNS4SAGA,chemMASQUE,Chem_RepTra_SAGA,iNbreCPU,radius_saga,tile_saga,no_data_max,pente)
             except subprocess.CalledProcessError as e:
                 logger.error(f"Erreur lors de l'exécution du script SAGA: {e}")
                 
@@ -1372,6 +1414,14 @@ def main():
         Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
 
         logger.info("Exécution parallèle de GEMO.")
+        print(RepTravail_tmp)
+        print(NbreDalleX)
+        print(NbreDalleY)
+        print(fsigma)
+        print(flambda)
+        print(norme)
+        print(no_data_ext)
+        print(iNbreCPU)
         RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_ext, iNbreCPU)
 
         logger.info("Raboutage final avec Rasterio.")

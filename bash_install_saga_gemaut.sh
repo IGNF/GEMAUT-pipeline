@@ -27,10 +27,10 @@ mkdir -p $GEMAUT_INSTALL_DIR
 
 cd $CURRENT_DIR
 
-git clone https://gitlab.ign.fr/GEMAUT/GEMAUT-Pipeline.git
+#git clone https://gitlab.ign.fr/GEMAUT/GEMAUT-Pipeline.git
 
-cd GEMAUT-Pipeline
 cd GEMO
+rm -r build
 mkdir build
 cd build 
 
@@ -41,13 +41,11 @@ mkdir -p $GEMAUT_INSTALL_DIR
 # Déplacer dans le répertoire de compilation
 cmake -DCMAKE_INSTALL_PREFIX=$GEMAUT_INSTALL_DIR ..
 make
-
-mkdir $GEMAUT_INSTALL_DIR/bin
-cp $CURRENT_DIR/GEMAUT-Pipeline/GEMO/build/main_GEMAUT_unit $GEMAUT_INSTALL_DIR/bin
+make install
 
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
 mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d
 
-cp $CURRENT_DIR/GEMAUT-Pipeline/activate_gemaut.sh   $CONDA_PREFIX/etc/conda/activate.d/ ; 
-cp $CURRENT_DIR/GEMAUT-Pipeline/deactivate_gemaut.sh $CONDA_PREFIX/etc/conda/deactivate.d/
+cp activate_gemaut.sh   $CONDA_PREFIX/etc/conda/activate.d/ ; 
+cp deactivate_gemaut.sh $CONDA_PREFIX/etc/conda/deactivate.d/
 
