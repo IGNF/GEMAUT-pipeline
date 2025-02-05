@@ -43,6 +43,8 @@ cmake -DCMAKE_INSTALL_PREFIX=$GEMAUT_INSTALL_DIR ..
 make
 make install
 
+cd $CURRENT_DIR
+
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
 mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d
 
