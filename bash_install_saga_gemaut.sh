@@ -8,7 +8,7 @@ SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
 mkdir -p $SAGA_INSTALL_DIR
 ##chown $USER:$USER $SAGA_INSTALL_DIR
 
-git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code
+#git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code
 
 ## cd
 cd $CURRENT_DIR/saga-gis-code/saga-gis/
@@ -43,11 +43,13 @@ cmake -DCMAKE_INSTALL_PREFIX=$GEMAUT_INSTALL_DIR ..
 make
 make install
 
-cd $CURRENT_DIR
-
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
 mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d
 
 cp activate_gemaut.sh   $CONDA_PREFIX/etc/conda/activate.d/ ; 
 cp deactivate_gemaut.sh $CONDA_PREFIX/etc/conda/deactivate.d/
+
+# Créer un lien symbolique dans le dossier personnel
+ln -sf $CURRENT_DIR/script_gemaut.py $HOME/GEMAUT/script_gemaut
+chmod +x $HOME/GEMAUT/script_gemaut
 
