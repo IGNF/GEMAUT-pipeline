@@ -103,6 +103,7 @@ def run_saga_par_dalle_parallel_avec_carte_pentes(RepIN,RepOUT,chem_pente_par_da
 
     return
 
+
 ################################################################################################################################
 def run_saga_par_dalle_parallel(RepIN,RepOUT,rayon,no_data,pente,iNbreCPU):
 
@@ -116,7 +117,6 @@ def run_saga_par_dalle_parallel(RepIN,RepOUT,rayon,no_data,pente,iNbreCPU):
             if not os.path.isdir(chem_rep_out): os.mkdir(chem_rep_out)
 
             chem_img=os.path.join(root,f)
-    
             chem_ground=os.path.join(chem_rep_out,'ground.sdat')
             chem_ground_tif=os.path.join(chem_rep_out,'ground.tif')
             chem_non_ground=os.path.join(chem_rep_out,'non_ground.sdat')
@@ -316,34 +316,38 @@ def Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, nom_g
         # Calculer le nombre de dalles en fonction de la taille spécifiée
         nombre_lignes = (hauteur + taille_dallage - 1) // taille_dallage
         nombre_colonnes = (largeur + taille_dallage - 1) // taille_dallage
+        total_dalles = nombre_lignes * nombre_colonnes  # Total des dalles à traiter
         
-        # Boucler sur chaque dalle
-        for i in range(nombre_lignes):
-            for j in range(nombre_colonnes):
-                # Calculer les coordonnées de la fenêtre pour la dalle
-                x_offset = j * taille_dallage
-                y_offset = i * taille_dallage
-                width = min(taille_dallage, largeur - x_offset)
-                height = min(taille_dallage, hauteur - y_offset)
+        with tqdm(total=total_dalles, desc="Découpage en dalles", unit="dalle") as pbar:
+            # Boucler sur chaque dalle
+            for i in range(nombre_lignes):
+                for j in range(nombre_colonnes):
+                    # Calculer les coordonnées de la fenêtre pour la dalle
+                    x_offset = j * taille_dallage
+                    y_offset = i * taille_dallage
+                    width = min(taille_dallage, largeur - x_offset)
+                    height = min(taille_dallage, hauteur - y_offset)
                 
-                # Définir la fenêtre de découpe
-                window = Window(x_offset, y_offset, width, height)
-                transform_window = src.window_transform(window)
+                    # Définir la fenêtre de découpe
+                    window = Window(x_offset, y_offset, width, height)
+                    transform_window = src.window_transform(window)
                 
-                # Mettre à jour le profil pour correspondre à la taille de la dalle
-                profile.update({
-                    'height': height,
-                    'width': width,
-                    'transform': transform_window
-                })
+                    # Mettre à jour le profil pour correspondre à la taille de la dalle
+                    profile.update({
+                        'height': height,
+                        'width': width,
+                        'transform': transform_window
+                    })
                 
-                # Nommer et enregistrer la dalle
-                nom_dalle = f"DALLAGE_{i + 1}_{j + 1}.tif"
-                nom_dalle = f"{nom_generic}{i + 1}_{j + 1}.tif"
-                chemin_dalle = os.path.join(RepTra_DALLAGE_tmp, nom_dalle)
+                    # Nommer et enregistrer la dalle
+                    nom_dalle = f"DALLAGE_{i + 1}_{j + 1}.tif"
+                    nom_dalle = f"{nom_generic}{i + 1}_{j + 1}.tif"
+                    chemin_dalle = os.path.join(RepTra_DALLAGE_tmp, nom_dalle)
                 
-                with rasterio.open(chemin_dalle, 'w', **profile) as dst:
-                    dst.write(src.read(window=window))
+                    with rasterio.open(chemin_dalle, 'w', **profile) as dst:
+                        dst.write(src.read(window=window))
+
+                    pbar.update(1)
                 
 ################################################################################################################################
 def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_data_ext):
@@ -502,6 +506,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
         if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
         
         #
+        logger.info(f"BEGIN Dallage du Chantier avec rasterio")
         Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, 'DALLAGE_')
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
@@ -582,7 +587,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
 
 ############################################################################################################
 #def main_saga_ground_extraction(args):
-def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext, taille_voisinage=5, K=2, percentile=5, seuil_diff=15):
+def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext, pente, taille_voisinage=5, K=2, percentile=5, seuil_diff=15):
     
     try:
 
@@ -601,35 +606,22 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
         if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
 
         #
-        # chem_pente_filtree=os.path.join(RepTra_tmp,'pente_filtree.tif')
-        # Calculer_pente_filtree(chem_mns, RepTra_tmp, chem_pente_filtree, percentile, taille_voisinage, seuil_diff)
-
-        # time_tmp = time.time()
-        # duration_tmp = time_tmp - start_time
-        # logger.info(f"FIN Calcule de la carte des pentes & filtre - Durée d'exécution : {duration_tmp:.2f} secondes")        
-        # #
-        # chem_pente_par_dallle=os.path.join(RepTra_tmp,'pente_par_dallle.tif')
-        # Daller_pente(chem_pente_filtree,chem_pente_par_dallle, taille_dallage)
-        # time_tmp = time.time()
-        # duration_tmp = time_tmp - start_time
-        # logger.info(f"FIN Dallage des Pentes - Durée d'exécution : {duration_tmp:.2f} secondes") 
-
-        #
         RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
         if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
         
         #
+        logger.info(f"BEGIN Dallage du Chantier avec rasterio")
         Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, 'DALLAGE_')
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes")         
+        logger.info(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes") 
 
         #
         RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
         if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
-        #toto
-        run_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,rayon,no_data,no_data_ext,iNbreCPU)
-
+        #
+        logger.info(f"BEGIN RUN de SAGA par dalle en parallèle")
+        run_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,rayon,no_data_ext,pente,iNbreCPU)
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
         logger.info(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  

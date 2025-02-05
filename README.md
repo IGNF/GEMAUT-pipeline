@@ -59,6 +59,7 @@ echo 'export PATH=$PATH:/home/NChampion/DATADRIVE1/DEVELOPPEMENT/GEMAUT-Pipeline
 source ~/.bashrc
 
 # go to the GEMAUT folder and run it script
+./script_gemaut.py --help 
 
 ############################################################################################################################################
 ### du coup, saga_cmd est installé ici >>> /home/NChampion/saga_install/bin/saga_cmd

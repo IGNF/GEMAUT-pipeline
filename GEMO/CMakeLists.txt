@@ -42,3 +42,5 @@ target_link_libraries(main_GEMAUT_unit
     -lpthread           # Pour les threads
     -ldl                # Dynamic linker
 )
+
+install(TARGETS main_GEMAUT_unit RUNTIME DESTINATION bin)
