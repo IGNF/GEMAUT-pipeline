@@ -8,7 +8,7 @@ SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
 mkdir -p $SAGA_INSTALL_DIR
 ##chown $USER:$USER $SAGA_INSTALL_DIR
 
-#git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code
+git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code
 
 ## cd
 cd $CURRENT_DIR/saga-gis-code/saga-gis/
