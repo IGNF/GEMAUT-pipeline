@@ -12,7 +12,10 @@ git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code
 
 ## cd
 cd $CURRENT_DIR/saga-gis-code/saga-gis/
-rm -r build
+
+if [ -d "build" ]; then
+    rm -r build
+fi
 mkdir build
 cd build
 
@@ -26,13 +29,15 @@ GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
 mkdir -p $GEMAUT_INSTALL_DIR
 
 cd $CURRENT_DIR
+cd GEMO
 
 #git clone https://gitlab.ign.fr/GEMAUT/GEMAUT-Pipeline.git
 
-cd GEMO
-rm -r build
+if [ -d "build" ]; then
+    rm -r build
+fi
 mkdir build
-cd build 
+cd build
 
 # Créer le répertoire d’installation
 mkdir -p $GEMAUT_INSTALL_DIR
