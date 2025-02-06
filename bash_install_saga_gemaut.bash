@@ -1,4 +1,4 @@
-
+#!/bin/bash
 CURRENT_DIR=${PWD}
 
 ### Définir un chemin d'installation configurable
