@@ -107,7 +107,7 @@ void saveWithGeoReference(const std::string& inputFilename, cv::Mat& image, cons
     GDALClose(outputDataset);
     GDALClose(inputDataset);
 
-    std::cout << "L'image a été enregistrée avec les informations géoréférencées." << std::endl;
+    //std::cout << "L'image a été enregistrée avec les informations géoréférencées." << std::endl;
 }
 
 
@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << "Nom_norme: " << Nom_norme << std::endl;
-    std::cout << "sigma: " << sigma << std::endl;
-    std::cout << "lambda: " << lambda << std::endl;
+    //std::cout << "Nom_norme: " << Nom_norme << std::endl;
+    //std::cout << "sigma: " << sigma << std::endl;
+    //std::cout << "lambda: " << lambda << std::endl;
 
     // Appeler GEA pour traiter les données    
     GEA(TTIma_MNE, TTIma_Masque, TTIma_Solut_Init, TTIma_MNT, Nom_norme, sigma, lambda, no_data_ext);

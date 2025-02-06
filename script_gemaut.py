@@ -787,25 +787,25 @@ def RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, n
     for x in range(NbreDalleX):
         for y in range(NbreDalleY):
             RepDalleXY=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y))
-            print(RepDalleXY)                            
+            #print(RepDalleXY)                            
             #fichier out mns
             ChemOUT_mns=os.path.join(RepDalleXY,"Out_MNS_%s_%s.tif"%(x,y))
-            print(ChemOUT_mns)    
+            #print(ChemOUT_mns)    
             #fichier out masque
             ChemOUT_masque=os.path.join(RepDalleXY,"Out_MASQUE_%s_%s.tif"%(x,y))
-            print(ChemOUT_masque)    
+            #print(ChemOUT_masque)    
             #fichier out masque
             ChemOUT_INIT=os.path.join(RepDalleXY,"Out_INIT_%s_%s.tif"%(x,y))
-            print(ChemOUT_INIT)    
+            #print(ChemOUT_INIT)    
             #fichier out mnt
             ChemOUT_mnt=os.path.join(RepDalleXY,"Out_MNT_%s_%s.tif"%(x,y))
-            print(ChemOUT_mnt)
+            #print(ChemOUT_mnt)
             # if os.path.exists(ChemOUT_mns):
             if contient_donnees(ChemOUT_mns, no_data_value):
                 # cmd_unitaire="%s -i %s %s %s -XG:%2.5f:%2.5f:%s:30000 -o %s -n0 >> /dev/null 2>&1" %(cmdxingng_chem_complet,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,fsigma,flambda,norme,ChemOUT_mnt)
                 # tasks.append(cmd_unitaire)
                 cmd_unitaire="%s %s %s %s %s %2.5f %2.5f %2.5f %s " %(cmd_gemo_unit,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,ChemOUT_mnt,fsigma,flambda,no_data_value,norme)                
-                print('>> ',cmd_unitaire)                
+                #print('>> ',cmd_unitaire)                
                 #cmd_unitaire="%s %s %s %s %s %2.5f %2.5f %2.5f %s >> /dev/null 2>&1 " %(cmd_gemo_unit,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,ChemOUT_mnt,fsigma,flambda,no_data_value,norme)                
                 #print('>> ',cmd_unitaire)
                 tasks.append(cmd_unitaire)
@@ -845,21 +845,8 @@ def Decoupe_dalle(args):
     """
     mns_file, masque_file, init_file, col_dalle, lig_dalle, x_offset, y_offset, l_dalle, h_dalle, no_data_value, RepTravail_tmp = args
 
-    print(' dans Decoupe_dalle ')
-    print(mns_file)
-    print(masque_file)
-    print(init_file)
-    print(col_dalle)
-    print(lig_dalle)
-    print(x_offset)
-    print(y_offset)
-    print(l_dalle)
-    print(h_dalle)
-    print(RepTravail_tmp)
-    print(' dans Decoupe_dalle ')    
-
     try:
-        print('création rep ', RepTravail_tmp)
+        #print('création rep ', RepTravail_tmp)
         if not os.path.isdir(RepTravail_tmp): 
             os.mkdir(RepTravail_tmp)
     except Exception as e:
@@ -917,16 +904,6 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
     #toto
     #     if not os.path.isdir(RepTra): os.mkdir(RepTra)
 #     if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
-    print('-')
-    print(mns_file)
-    print(masque_file)
-    print(init_file)
-    print(taille_dalle)
-    print(iTailleRecouvrement)
-    print(no_data_value)
-    print(RepTravail_tmp)
-    print(iNbreCPU)
-    print('-')
 
     with rasterio.open(mns_file) as mns_src:
         largeur = mns_src.width
@@ -941,9 +918,6 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
         # Calculer le nombre de dalles avec recouvrement
         NbreDalleX = (largeur - iTailleRecouvrement + pas_x - 1) // pas_x
         NbreDalleY = (hauteur - iTailleRecouvrement + pas_y - 1) // pas_y
-
-        print('**** ',NbreDalleX)
-        print('**** ',NbreDalleY)
 
         # Créer une liste des paramètres pour chaque dalle avec un compteur d'index
         params = []
@@ -961,13 +935,9 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
                 # Ajouter les paramètres pour traiter cette dalle
                 params.append((mns_file, masque_file, init_file, x, y, x_offset, y_offset, l_bloc, h_bloc, no_data_value, RepTravail_tmp))
         
-        print('aqui')
         # Utiliser multiprocessing pour traiter les dalles en parallèle avec une barre de progression
         with Pool(processes=iNbreCPU) as pool:
             # Utiliser tqdm pour la barre de progression
-            print('--------------------')
-            print(params)
-            print('--------------------')
             results = list(tqdm(pool.imap_unordered(Decoupe_dalle, params), total=len(params), desc="- Traitement des dalles -"))
 
 ####################################################################################################
@@ -1414,14 +1384,6 @@ def main():
         Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
 
         logger.info("Exécution parallèle de GEMO.")
-        print(RepTravail_tmp)
-        print(NbreDalleX)
-        print(NbreDalleY)
-        print(fsigma)
-        print(flambda)
-        print(norme)
-        print(no_data_ext)
-        print(iNbreCPU)
         RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_ext, iNbreCPU)
 
         logger.info("Raboutage final avec Rasterio.")

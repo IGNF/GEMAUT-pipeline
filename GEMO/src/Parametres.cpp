@@ -11,6 +11,7 @@ Parametres::Parametres(const cv::Mat& TTIma_MNE, const cv::Mat& TTIma_Masque, TP
 	
 	int type = TTIma_Masque.type();
 
+	/*
 	// Tester les types liés aux entiers
 	if (type == CV_8U) {
 		std::cout << "Le type est CV_8U (unsigned 8-bit)" << std::endl;
@@ -37,7 +38,8 @@ Parametres::Parametres(const cv::Mat& TTIma_MNE, const cv::Mat& TTIma_Masque, TP
 	} else {
 		std::cout << "Type inconnu" << std::endl;
 	}
-	
+	*/
+
     m_taille.x = TTIma_Masque.cols;  // Use cols for number of columns
     m_taille.y = TTIma_Masque.rows;  // Use rows for number of rows
     m_SortieMin = static_cast<int>(SortieMinMax.x);  // Use .x and .y for TPoint2D
