@@ -62,6 +62,4 @@ chmod +x $HOME/GEMAUT/script_gemaut
 
 # Recharger l'environnement Conda pour appliquer immédiatement les changements
 source $CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh
-hash -r  # Force le shell à recharger les chemins des commandes
-ldconfig  # Mets à jour les liens vers les bibliothèques dynamiques
 
