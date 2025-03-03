@@ -90,9 +90,8 @@ def run_saga_par_dalle_parallel_avec_carte_pentes(RepIN,RepOUT,chem_pente_par_da
                 pente_local = band_data[row, col]
                 # cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente_local} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE 15 -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
-                logger.info(f"{cmd_saga_1_dalle}")
                 tasks.append(cmd_saga_1_dalle)
-                logger.info(f"cmd_saga_1_dalle {cmd_saga_1_dalle}")
+                logger.info(f"{cmd_saga_1_dalle}")
             else:
                 #on copie directement la dalle MNS no_data dans le ground.tif, ça sert juste pour l'assemblage plus tard [implémentation très sale]
                 shutil.copyfile(chem_img, chem_ground_tif) 
