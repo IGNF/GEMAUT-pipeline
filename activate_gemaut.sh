@@ -17,9 +17,9 @@ if [ ! -f "$CONDA_PREFIX/bin/script_gemaut" ]; then
 fi
 
 # Ajouter script_gemaut.py dans le PATH via un lien symbolique
-#if [ ! -f "$CONDA_PREFIX/bin/script_gemaut" ]; then
-#    ln -sf $GEMAUT_INSTALL_DIR/script_gemaut.py $CONDA_PREFIX/bin/script_gemaut
-#fi
+if [ ! -f "$CONDA_PREFIX/bin/saga_cmd" ]; then
+    ln -sf $HOME/GEMAUT/saga_install/bin/saga_cmd $CONDA_PREFIX/bin/saga_cmd
+fi
 
 echo "GEMAUT and SAGA environment activated."
 
