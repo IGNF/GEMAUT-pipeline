@@ -1,5 +1,7 @@
 <img src="assets/logo.png" alt="GEMAUT Logo" width="200"/>
 
+L'outil pour le passage MNS > MNT
+
 ## installation
 
 git clone https://github.com/IGNF/GEMAUT-pipeline.git
