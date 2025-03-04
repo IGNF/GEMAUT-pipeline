@@ -1,6 +1,6 @@
 ## installation
 
-git clone https://github.com/champignon69/GEMAUT-pipeline.git
+git clone https://github.com/IGNF/GEMAUT-pipeline.git
 
 cd GEMAUT-pipeline
 
