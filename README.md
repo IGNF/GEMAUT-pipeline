@@ -1,4 +1,4 @@
-<img src="assets/logo.png" alt="GEMAUT Logo" width="512"/>
+<img src="assets/logo.png" alt="GEMAUT Logo" width="200"/>
 
 ## installation
 
