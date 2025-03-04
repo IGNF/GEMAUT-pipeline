@@ -284,9 +284,6 @@ def calculer_masque_ponderation(width, height, axis):
 
     return mask
     
-
-
-
 ##################################################################################################################
 def sauvegarder_chevauchement(src, window, output_dir):
     # Extraire les données de la fenêtre
@@ -1241,7 +1238,8 @@ def parse_arguments():
     parser.add_argument("--init", type=str, help="initialisation [par défaut le MNS]")
     parser.add_argument("--out", type=str, required=True, help="output DTM")
     parser.add_argument("--RepTra", type=str, required=True, help="repertoire de Travail")
-    parser.add_argument("--groundval", type=int, required=True, help="valeur de masque pour le SOL")
+    #parser.add_argument("--groundval", type=int, required=True, help="valeur de masque pour le SOL")
+    parser.add_argument("--groundval", type=int, help="valeur de masque pour le SOL (obligatoire si --masque est renseigné)")
     parser.add_argument("--reso", type=float, required=True, default=4, help="resolution du MNT en sortie")
     parser.add_argument("--sigma", type=float, default=0.5, help="sigma / précision du Z MNS")
     parser.add_argument("--regul", type=float, default=0.01, help="regul / rigidité de la nappe")
@@ -1252,9 +1250,15 @@ def parse_arguments():
     parser.add_argument("--nodata_ext", type=int, default=-32768, required=True, help="Valeur du no_data sur les bords de chantier")
     parser.add_argument("--nodata_int", type=int, default=-32767, help="Valeur du no_data pour les trous à l'intérieur du chantier")
     parser.add_argument("--clean", action='store_true', help="supprimer les fichiers temporaires à la fin du traitement")
+    
     # Parsing des arguments
-    return parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(sys.argv[1:])
 
+    # Validation conditionnelle
+    if args.masque and args.groundval is None:
+        parser.error("--groundval est obligatoire si --masque est renseigné.")
+
+    return args
 
         
 
