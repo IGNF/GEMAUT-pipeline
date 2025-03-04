@@ -1,3 +1,5 @@
+<img src="assets/logo.png" alt="GEMAUT Logo" width="512"/>
+
 ## installation
 
 git clone https://github.com/IGNF/GEMAUT-pipeline.git
