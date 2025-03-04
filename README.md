@@ -17,3 +17,5 @@ bash bash_install_saga_gemaut.bash
 source $CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh
 
 script_gemaut --help
+
+script_gemaut  --mns chem_vers_MNS_IN.tif --out chemin_vers_MNT_OUT.tif --reso 4 --RepTra RepTraVerif --nodata_ext -32768 --nodata_int -32767 --cpu 6
