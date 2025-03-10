@@ -1,4 +1,7 @@
-<img src="assets/logo.png" alt="GEMAUT Logo" width="200"/>
+<p align="center">
+  <img src="assets/logo.png" alt="GEMAUT" width="200" style="margin-right: 20px;"/>
+  <img src="assets/Linux.png" alt="Linux" width="200"/>
+</p>
 
 L'outil pour le passage MNS > MNT
 
