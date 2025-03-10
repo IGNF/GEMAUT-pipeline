@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, time, shutil
-#sys.path.append('/Volumes/ALI_Serveur/OUTILS_IGNE/OUTILS_DIVERS/GEMAUT/GEMAUT-Pipeline')
 from SAGA.script_saga_ground_extraction import main_saga_ground_extraction
 import subprocess
 import argparse
@@ -25,55 +24,7 @@ from loguru import logger
 
 os.environ['OMP_NUM_THREADS'] = '1'
 
-#cmd_gemo_unit='/Volumes/ALI_Serveur/OUTILS_IGNE/OUTILS_DIVERS/GEMAUT/GEMAUT-Pipeline/gemo_unit_opencv_sans_xing/build_once/main_GEMAUT_unit'
-cmd_gemo_unit='main_GEMAUT_unit'
-
-# cmd_XinG='_XinG'
-# cmdxingng='xingng'
-# cmdxingng_chem_complet='/Volumes/ALI_Serveur/DEPLOIEMENT/bin_linux/xingng' 
-# cmd_blending_otb='/home/OTB/OTB-7.4.0-Linux64/bin/otbcli_Mosaic'        
-#cmd_gemo_unit='/Volumes/ALI_Serveur/OUTILS_IGNE/OUTILS_DIVERS/GEMAUT/GEMAUT-Pipeline/gemo_unit_opencv_sans_xing/build/main_GEMAUT_unit'
-#cmd_script_extract_ground_saga='/Volumes/ALI_Serveur/OUTILS_IGNE/OUTILS_DIVERS/GEMAUT/SAGA/main_extract_ground_points_with_saga_dallage_sans_xing.py'
-
-##################################################################################################################
-def GetValue_XING_OLD(listInfo,chaine):
-    
-    for l in listInfo:
-        lig=l.strip()
-        if lig.find(chaine) != -1:
-            return lig.split()[-1]
-        
-############################################################################################################################         
-def GetInfo_XING_OLD(cmdxingng, chemMNS):
-    ### récupérer les infos dans un flux
-    cmdinfo="%s -i %s  -n:stdout 2>/dev/null " % (cmdxingng,chemMNS)
-    pipe= os.popen(cmdinfo)
-    listInfo = pipe.readlines()
-    pipe.close()
-    ### initialisation des variables
-    PasX, PasY, projection, X_0, X_1, Y_0, Y_1 = 0, 0, 0, 0, 0, 0, 0 
-    phasage="HG"
-    ### récupération des données
-    PasX=float(GetValue_XING_OLD(listInfo,"pas en X"))
-    PasY=float(GetValue_XING_OLD(listInfo,"pas en Y"))
-    X_0=float(GetValue_XING_OLD(listInfo,"position en X (GAUCHE)"))
-    Y_1=float(GetValue_XING_OLD(listInfo,"position en Y (HAUT)"))
-    X_1=float(GetValue_XING_OLD(listInfo,"position en X (DROITE)"))
-    Y_0=float(GetValue_XING_OLD(listInfo,"position en Y (BAS)")) 
-    NbreCol=float(GetValue_XING_OLD(listInfo,"nombre de colonnes"))
-    NbreLig=float(GetValue_XING_OLD(listInfo,"nombre de lignes"))
-    if GetValue_XING_OLD(listInfo,"GTModelTypeGeoKey"): GModel=int(GetValue_XING_OLD(listInfo,"GTModelTypeGeoKey"))      
-    else: GModel=-1
-    if GetValue_XING_OLD(listInfo,"GTRasterTypeGeoKey"): GRaster=int(GetValue_XING_OLD(listInfo,"GTRasterTypeGeoKey"))
-    else: GRaster=-1
-    if GetValue_XING_OLD(listInfo,"code EPSG"): Projection=int(GetValue_XING_OLD(listInfo,"code EPSG"))
-    else: Projection=-1
-    ### traitement différent pour le phasage
-    if  (GetValue_XING_OLD(listInfo,"CENTRE PIXEL") == ""):
-        phasage="HG"
-    else: phasage="CP"
-        
-    return [PasX,PasY,Projection,X_0,X_1,Y_0,Y_1,phasage,NbreCol,NbreLig,GModel,GRaster]       
+cmd_gemo_unit='main_GEMAUT_unit'     
 
 ####################################################################################################
 def GetNbLignes(chemMNS):
@@ -103,30 +54,6 @@ def init_worker():
 # Fonction pour exécuter une commande quelconque (notamment gdal) via subprocess
 def run_task_sans_SORTIEMESSAGE(cmd):
     subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-################################################################################################################################
-def cmd_docker_saga_1_dalle(chem_rep_montage,chem_RELATIF_IN,chem_RELATIF_OUT,pente):
-    # Définir les chemins des fichiers et les paramètres
-    #"/data/PO_MNS_LA93.tif"
-    chem_dsm_4_docker = os.path.join('/data',chem_RELATIF_IN)
-    #"/data/RepTra"
-    chem_RepTra_4_docker = os.path.join('/data',chem_RELATIF_OUT)
-    # slope = 15
-    
-    # Construire la commande Docker
-    command_docker_extract_ground_saga = f"docker run --rm -v {chem_rep_montage}:/data extract_ground_points --dsm {chem_dsm_4_docker} --RepTra {chem_RepTra_4_docker} --slope {pente}"
-    #print(f"{command_docker_extract_ground_saga}")
-    
-    return command_docker_extract_ground_saga
-
-    # # Exécuter la commande Docker
-    # exit_code = os.system(command_docker_extract_ground_saga)
-    
-    # # Vérifier le code de sortie
-    # if exit_code == 0:
-    #     print("Command executed successfully")
-    # else:
-    #     print(f"Command failed with exit code {exit_code}")
 
 ############################################################################################################
 def dallage_pente(chem_pente_filtree,chem_pente_par_dallle,taille_carre):
@@ -175,81 +102,6 @@ def dallage_pente(chem_pente_filtree,chem_pente_par_dallle,taille_carre):
         dst.write(result_pente_par_dalle, 1)
 
     return
-
-# ################################################################################################################################
-# def Calcule_pente_et_filtre(chem_mns,RepTra_tmp,chem_pente_filtree,taille,K,percentile,seuil_diff):
-
-#     chem_pente=os.path.join(RepTra_tmp,'pente.tif')
-#     chem_pente_smooth=os.path.join(RepTra_tmp,'pente_smooth.tif')
-#     chem_diff_pente_smooth=os.path.join(RepTra_tmp,'diff_pente_smooth.tif')
-
-#     # xingng -i MNS.tif -Xp -o pente.tif
-#     cmd=f"xingng -i {chem_mns} -Xp -o {chem_pente} -n0 > /dev/null 2>&1 "
-#     os.system(cmd)
-
-#     # on fait du nettoyage dans les bâtiments avec FN_5x5_Q_5
-#     # xingng -i ./pente.tif -FN:5:5:2:Q:5 -o pente_FN_5x5_Q_5.tif
-#     cmd=f"xingng -i {chem_pente} -FN:{taille}:{taille}:{K}:Q:{percentile} -o {chem_pente_smooth} -n0 > /dev/null 2>&1 "
-#     os.system(cmd)
-
-#     cmd=f"xingng -i {chem_pente} {chem_pente_smooth} -X- -o {chem_diff_pente_smooth} -n0 > /dev/null 2>&1 "
-#     os.system(cmd)
-
-#     # xingng -i pente.tif pente_CROP_FN_5x5_Q_5.tif diff.tif -e'I3.1>15?I2.1:I1.1' -o pente_filtree.tif
-#     cmd=f"xingng -i {chem_pente} {chem_pente_smooth} {chem_diff_pente_smooth} -e'I3.1>{seuil_diff}?I2.1:I1.1' -o {chem_pente_filtree} -n0 > /dev/null 2>&1 " 
-#     os.system(cmd)
-
-#     return
-
-# ############################################################################################################
-# def compute_ground_mask_parallel(chem_mns,chem_out_final,RepTra,taille_voisinage,K,percentile,taille_dallage,seuil_diff,iNbreCPU):
-    
-#     RepTra_tmp=os.path.join(RepTra,"tmp")
-#     if not os.path.isdir(RepTra): os.mkdir(RepTra)
-#     if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
-
-#     #
-#     chem_pente_filtree=os.path.join(RepTra_tmp,'pente_filtree.tif')
-#     Calcule_pente_et_filtre(chem_mns,RepTra_tmp,chem_pente_filtree,taille_voisinage,K,percentile,seuil_diff)
-
-#     #
-#     chem_pente_par_dallle=os.path.join(RepTra_tmp,'pente_par_dallle.tif')
-#     dallage_pente(chem_pente_filtree,chem_pente_par_dallle,taille_dallage)
-
-#     # #
-#     # # Découper suivant des dalles de taille_dallage
-#     RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
-#     if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
-        
-#     #
-#     chem_DALLAGE_out=os.path.join(RepTra_DALLAGE_tmp,'DALLAGE')
-#     cmd=f"xingng -i {chem_mns} -Di:N:20:20 -o {chem_DALLAGE_out} -n0 > /dev/null 2>&1"
-#     os.system(cmd)
-        
-#     #
-#     RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
-#     if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
-#     run_docker_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,chem_pente_par_dallle,taille_dallage,iNbreCPU)
-
-#     #
-#     for root, dirs, files in os.walk(RepTra_OUT_SAGA_tmp):
-#         for f in files:
-#             if f.startswith('ground') and f.endswith('.sdat'):
-#                 chem_in=os.path.join(root,f)
-#                 chem_out=f"{chem_in[:-5]}.tif"
-#                 cmd=f"gdal_translate {chem_in} {chem_out}"
-#                 os.system(cmd)
-
-#     # cmd_ass=f"xingng -i {}  -a -o {os.path.join(chem_out_final,expression)} -n0 > /dev/null 2>&1 " 
-#     expression="*/ground.tif" 
-#     chem_assemblage=os.path.join(RepTra_tmp,'ASS.tif')
-#     cmd_ass_final=f"xingng -i {os.path.join(RepTra_OUT_SAGA_tmp,expression)}  -a -o {chem_assemblage} -n0 > /dev/null 2>&1 " 
-#     os.system(cmd_ass_final) 
-
-#     cmd_final=f"xingng -i {chem_assemblage} -e'I1.1==-99999?255:0' -o {chem_out_final} -tuc -n0 > /dev/null 2>&1 "
-#     os.system(cmd_final) 
-
-#     return
 
 ##################################################################################################################
 def Raboutage_OTB_BUG(RepTravail_tmp,NbreDalleX,NbreDalleY,chemMNT_OUT):
@@ -333,6 +185,7 @@ def obtenir_zone_chevauchement(src1, src2):
 
     return window1, window2
 
+##################################################################################################################
 def save_raster(data, filename, profile):
     """
     Sauvegarde une image raster en utilisant rasterio.
@@ -537,134 +390,6 @@ def Raboutage(RepTravail_tmp, NbreDalleX, NbreDalleY, chemMNT_OUT):
     logger.info(f"Ligne mosaïque sauvegardée sous {chemMNT_OUT}")
     pbar.update(pbar.total - pbar.n) 
 
-##################################################################################################################
-def Raboutage_XING(RepTravail_tmp,NbreDalleX,NbreDalleY,chemMNT_OUT):
-
-    #total_steps = (NbreDalleY * (NbreDalleX - 1)) + 2 * NbreDalleY
-    total_steps = 3 * NbreDalleY * NbreDalleX 
-    with tqdm(total=total_steps, desc="Progression globale", unit="étape") as pbar:
-        
-        ####################################################################################################################################################
-        ####################################################################################################################################################                
-        ## on assemble tout d'abord ligne par ligne       #####################################################################################################
-        ####################################################################################################################################################
-        ####################################################################################################################################################
-        
-        ####################################################################################################################################################        
-        ## on raboute tout d'abord 2 dalles côte à côté (en X)       #########################################################################################
-        ####################################################################################################################################################    
-        
-        for y in range(NbreDalleY):
-            for x in range(NbreDalleX-1):
-                ## Nom de la dalle courante    
-                chem_MNT_GEMAUT_OUT_dalle_xy=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y),"Out_MNT_%s_%s.tif"%(x,y))
-                chem_MNT_GEMAUT_OUT_dalle_xy_droite=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x+1,y),"Out_MNT_%s_%s.tif"%(x+1,y))                
-                ## IMAGE GAUCHE / IMAGE DROITE <> DALLE_0_0 / DALLE_1_0 !
-                cmd_1="%s -i %s %s -X- -o %s -n0 >> /dev/null 2>&1 " %(cmdxingng,chem_MNT_GEMAUT_OUT_dalle_xy,chem_MNT_GEMAUT_OUT_dalle_xy_droite, os.path.join(RepTravail_tmp,'diff_tmp.tif'))
-                os.system(cmd_1)
-
-                cmd_2="%s -i %s -e'C/NC' -o  %s -tf -n0 >> /dev/null 2>&1" %(cmdxingng,os.path.join(RepTravail_tmp,'diff_tmp.tif'),os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HD.tif'))
-                os.system(cmd_2)
-                
-                cmd_3="%s -i %s -e'1-I1' -o  %s -n0 >> /dev/null 2>&1" %(cmdxingng,os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HD.tif'),os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HG.tif'))
-                os.system(cmd_3)
-                
-                liste_info_tmp=GetInfo_XING_OLD(cmdxingng, os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HD.tif'))
-
-                cmd_final="%s -i %s %s %s %s -e'I1*I2+I3*I4' -o %s -cg:%s:%s:%s:%s -n0 >> /dev/null 2>&1" %(cmdxingng,chem_MNT_GEMAUT_OUT_dalle_xy,
-                                                                                    os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HG.tif'),
-                                                                                    chem_MNT_GEMAUT_OUT_dalle_xy_droite, 
-                                                                                    os.path.join(RepTravail_tmp,'poids_HG_HD_pour_HD.tif'),
-                                                                                    os.path.join(RepTravail_tmp,'reconstruction_dalle_%s_%s_%s.tif' %(x,x+1,y)),
-                                                                                    liste_info_tmp[3],
-                                                                                    liste_info_tmp[4],
-                                                                                    liste_info_tmp[5],
-                                                                                    liste_info_tmp[6])
-                                                                                                                                                                    
-                pbar.update(1)
-                os.system(cmd_final)
-
-        ####################################################################################################################################################        
-        ## on raboute toutes les dalles sur une même rangée        #########################################################################################
-        ####################################################################################################################################################
-                
-        ## on réassemble tout    
-        for y in range(NbreDalleY):
-            
-            ### initialisation ligne de commande
-            cmd_assemblage_final_par_ligne="%s -i " %cmdxingng
-            
-            for x in range(NbreDalleX):
-                cmd_assemblage_final_par_ligne=cmd_assemblage_final_par_ligne+" "+os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y),"Out_MNT_%s_%s.tif"%(x,y))
-                pbar.update(1)
-
-            for x in range(NbreDalleX-1):
-                cmd_assemblage_final_par_ligne=cmd_assemblage_final_par_ligne+" "+os.path.join(RepTravail_tmp,'reconstruction_dalle_%s_%s_%s.tif' %(x,x+1,y))
-                pbar.update(1)
-
-            #
-            chem_final_tmp=os.path.join(RepTravail_tmp,'reconstruction_dalle_%s.tif' %y) 
-            str_tmp=" -a -o %s -n:" %chem_final_tmp
-            cmd_assemblage_final_par_ligne+=str_tmp
-            pbar.update(1)
-
-            os.system(cmd_assemblage_final_par_ligne)    
-            
-        ####################################################################################################################################################
-        ####################################################################################################################################################                
-        ## on assemble les rangées entre elles         #####################################################################################################
-        ####################################################################################################################################################
-        ####################################################################################################################################################
-                    
-        ## on réassemble tout    
-        for y in range(NbreDalleY-1):
-            
-            chem_dalle_y=os.path.join(RepTravail_tmp,'reconstruction_dalle_%s.tif' %y)             
-            chem_dalle_y_dessous=os.path.join(RepTravail_tmp,'reconstruction_dalle_%s.tif' %(y+1))
-            
-            cmd_1="%s -i %s %s -X- -o %s -n:" %(cmdxingng,chem_dalle_y,chem_dalle_y_dessous,os.path.join(RepTravail_tmp,'diff_tmp.tif'))
-            os.system(cmd_1)
-            
-            cmd_2="%s -i %s -e'L/NL' -o %s -tf -n:" %(cmdxingng,os.path.join(RepTravail_tmp,'diff_tmp.tif'),os.path.join(RepTravail_tmp,'poids_HG_BG_pour_BG.tif'))
-            os.system(cmd_2)
-            
-            cmd_3="%s -i %s -e'1-I1' -o %s -n:" %(cmdxingng,os.path.join(RepTravail_tmp,'poids_HG_BG_pour_BG.tif'),os.path.join(RepTravail_tmp,'poids_HG_BG_pour_HG.tif'))
-            os.system(cmd_3)            
-            
-            liste_info_tmp=GetInfo_XING_OLD(cmdxingng, os.path.join(RepTravail_tmp,'poids_HG_BG_pour_BG.tif'))
-            
-            cmd_final="%s -i %s %s %s %s -e'I1*I2+I3*I4' -o %s -cg:%s:%s:%s:%s -n:" %(cmdxingng,chem_dalle_y,
-                                                                            os.path.join(RepTravail_tmp,'poids_HG_BG_pour_HG.tif'),
-                                                                            chem_dalle_y_dessous,os.path.join(RepTravail_tmp,'poids_HG_BG_pour_BG.tif'),
-                                                                            os.path.join(RepTravail_tmp,
-                                                                            'reconstruction_dalle_%s_%s.tif' %(y,y+1)),
-                                                                            liste_info_tmp[3],
-                                                                            liste_info_tmp[4],
-                                                                            liste_info_tmp[5],
-                                                                            liste_info_tmp[6])
-            pbar.update(1)
-            os.system(cmd_final)
-            
-        ### initialisation ligne de commande
-        cmd_assemblage_final="%s -i " %cmdxingng
-            
-        ## on réassemble tout    
-        for y in range(NbreDalleY):
-            chem_dalle_y=os.path.join(RepTravail_tmp,'reconstruction_dalle_%s.tif' %y)     
-            cmd_assemblage_final=cmd_assemblage_final+" "+chem_dalle_y
-           
-        ## on réassemble tout    
-        for y in range(NbreDalleY-1):
-            cmd_assemblage_final=cmd_assemblage_final+" "+os.path.join(RepTravail_tmp,'reconstruction_dalle_%s_%s.tif' %(y,y+1))
-        
-        # en ARGUMENT DE LA FONCTION MAINTENANT...
-        # chemMNT_OUT=os.path.join(RepTravail,"OUT_MNT_GEMAUT_final.tif")
-        str_tmp=" -a -o %s -n:" %chemMNT_OUT
-        cmd_assemblage_final+=str_tmp
-        
-        os.system(cmd_assemblage_final)  
-        pbar.update(pbar.total - pbar.n) 
-
 #################################################################################################### 
 ### calcule le nombre de dalles en X et en Y en fonction des paramètres de chantier
 def CalculNombreDallesXY(NbColonnes,NbLignes,Taille_dalle,Recouv_entre_dalles):
@@ -716,19 +441,6 @@ def GetInfo(chemMNS):
         return [PasX, PasY, Projection, X_0, X_1, Y_0, Y_1, area_or_point, NbreCol, NbreLig]
 
 ############################################################################################################################         
-def GetNbreDalleXDalleY_XING(chemMNS_SousEch):
-
-    infos=GetInfo(cmdxingng, chemMNS_SousEch)
-    NbreCol=infos[8]
-    NbreLig=infos[9]
-        
-    NombreDallesXY=CalculNombreDallesXY(NbreCol,NbreLig,iTailleparcelle,iTailleRecouvrement)
-    NbreDalleX=int(NombreDallesXY[0])
-    NbreDalleY=int(NombreDallesXY[1])
-
-    return NbreDalleX, NbreDalleY
-
-############################################################################################################################         
 def GetNbreDalleXDalleY(chemMNS_SousEch, iTailleparcelle, iTailleRecouvrement):
     # Ouvrir le fichier raster
     with rasterio.open(chemMNS_SousEch) as src:
@@ -742,40 +454,6 @@ def GetNbreDalleXDalleY(chemMNS_SousEch, iTailleparcelle, iTailleRecouvrement):
 
     return NbreDalleX, NbreDalleY
 
-#################################################################################################### 
-def RunGemoEnParallel_XING(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_value, iNbreCPU):
-    
-    tasks = []
-
-    for x in range(NbreDalleX):
-        for y in range(NbreDalleY):
-            RepDalleXY=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y))
-                                
-            #fichier out mns
-            ChemOUT_mns=os.path.join(RepDalleXY,"Out_MNS_%s_%s.tif"%(x,y))
-                
-            #fichier out masque
-            ChemOUT_masque=os.path.join(RepDalleXY,"Out_MASQUE_%s_%s.tif"%(x,y))
-                
-            #fichier out masque
-            ChemOUT_INIT=os.path.join(RepDalleXY,"Out_INIT_%s_%s.tif"%(x,y))
-                
-            #fichier out mnt
-            ChemOUT_mnt=os.path.join(RepDalleXY,"Out_MNT_%s_%s.tif"%(x,y))
-            
-            # if os.path.exists(ChemOUT_mns):
-            if contient_donnees(ChemOUT_mns, no_data_value):
-                cmd_unitaire="%s -i %s %s %s -XG:%2.5f:%2.5f:%s:30000 -o %s -n0 >> /dev/null 2>&1" %(cmdxingng_chem_complet,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,fsigma,flambda,norme,ChemOUT_mnt)
-                tasks.append(cmd_unitaire)
-            else:
-                shutil.copyfile(ChemOUT_mns, ChemOUT_mnt)
-                 
-	# Initialize the pool
-    with Pool(processes=iNbreCPU, initializer=init_worker) as pool:
-        results = list(tqdm(pool.imap_unordered(os.system, tasks), total=len(tasks), desc="Lancement de GEMO unitaire en parallèle"))
-		
-        
-    return
 #################################################################################################### 
 def RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_value, iNbreCPU):
     
@@ -898,9 +576,6 @@ def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleReco
     :param no_data_value: Valeur représentant "no data" pour MNS.
     :param RepTravail_tmp: Répertoire temporaire où enregistrer les dalles traitées.
     """
-    #toto
-    #     if not os.path.isdir(RepTra): os.mkdir(RepTra)
-#     if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
 
     with rasterio.open(mns_file) as mns_src:
         largeur = mns_src.width
@@ -1224,7 +899,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description='GEMAUT - Génération de Modèles Automatiques de Terrain',
         epilog="""EXEMPLE DE LIGNE DE COMMANDE:
-        ./script_run_gemaut_refactoring.py --reso 2 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] --nodata_ext -32768 [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
+        ./script_run_gemaut_refactoring.py --reso 4 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] --nodata_ext -32768 [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
         
         IMPORTANT
         Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
@@ -1261,7 +936,6 @@ def parse_arguments():
     return args
 
         
-
 ####################################################################################################
 def main():
 
@@ -1423,5 +1097,3 @@ def main():
 ####################################################################################################
 if __name__ == "__main__":
     main()
-
- 
