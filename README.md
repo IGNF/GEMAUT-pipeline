@@ -3,7 +3,7 @@
   <img src="assets/Linux.png" alt="Linux" width="200"/>
 </p>
 
-L'outil pour le passage MNS > MNT
+L'outil pour le passage MNS > MNT sous Linux (& conda)
 
 ## installation
 
