@@ -36,10 +36,12 @@ def contient_donnees(chem_mns, no_data_value=-9999):
         data = src.read(1)  # Lecture de la première bande (ou unique bande)
         return not np.all(data == no_data_value)
     
+####################################################################################################
 # Fonction pour exécuter gdal_translate via subprocess
 def run_task_sans_SORTIEMESSAGE(cmd):
     subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+####################################################################################################
 def run_task(cmd):
     try:
         subprocess.run(cmd, shell=True, check=True)
@@ -101,7 +103,6 @@ def run_saga_par_dalle_parallel_avec_carte_pentes(RepIN,RepOUT,chem_pente_par_da
         list(tqdm(pool.imap_unordered(run_task_sans_SORTIEMESSAGE, tasks), total=len(tasks), desc="Lancement de SAGA unitaire en parallèle"))
 
     return
-
 
 ################################################################################################################################
 def run_saga_par_dalle_parallel(RepIN,RepOUT,rayon,no_data,pente,iNbreCPU):
@@ -373,18 +374,6 @@ def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_dat
             dst.write(binary_data, 1)
 
     logger.info(f"[SAGA] Creer_image_binaire OK")
-
-        # Raboutage_DALLAGE_SAGA(RepTra_OUT_SAGA_tmp_expand,chem_out_final_expand_tmp,iNbreCPU)
-
-        # tasks_gdal = []
-        # for root, dirs, files in os.walk(RepTra_OUT_SAGA_tmp_expand):
-        #     for f in files:
-        #         if f.startswith('ground') and f.endswith('sdat'):
-        #             chem_in = os.path.join(root, f)
-        #             chem_out = f"{chem_in[:-5]}.tif"
-        #             cmd = f"gdal_translate {chem_in} {chem_out}"
-        #             tasks_gdal.append(cmd)
-        #             logger.info(cmd)
                     
 ############################################################################################################
 def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,iNbreCPU):
@@ -536,7 +525,6 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
         
         # Utiliser le Pool de multiprocessing
         # Utiliser imap_unordered pour traiter les commandes en parallèle
-        ## NE JAMAIS UTILISER OS.SYSTEM DANS LA PARALLELISATION >> results = list(tqdm(pool.imap_unordered(os.system, tasks_gdal), total=len(tasks_gdal), desc="Convertir les .sdat de SAGA en .tif"))
         with Pool(processes=iNbreCPU) as pool:
             list(tqdm(pool.imap_unordered(run_task_sans_SORTIEMESSAGE, tasks_gdal), total=len(tasks_gdal), desc="Convertir les .sdat de SAGA en .tif avec gdal_translate"))
 

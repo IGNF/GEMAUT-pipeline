@@ -899,12 +899,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description='GEMAUT - Génération de Modèles Automatiques de Terrain',
         epilog="""EXEMPLE DE LIGNE DE COMMANDE:
-        ./script_run_gemaut_refactoring.py --reso 4 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] --nodata_ext -32768 [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
+        script_gemaut --reso 4 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] --nodata_ext -32768 [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
         
-        IMPORTANT
+        \n IMPORTANT
         Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
 
-    """
+    """,
+        formatter_class=argparse.RawTextHelpFormatter
     )
 
     # Définition des arguments du programme
