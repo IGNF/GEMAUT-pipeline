@@ -21,4 +21,4 @@ source $CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh
 
 script_gemaut --help
 
-script_gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra
+script_gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--nodata_ext -32768] [--nodata_int -32767]
