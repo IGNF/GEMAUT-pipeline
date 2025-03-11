@@ -899,7 +899,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description='GEMAUT - Génération de Modèles Automatiques de Terrain',
         epilog="""EXEMPLE DE LIGNE DE COMMANDE:
-        script_gemaut --reso 4 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] --nodata_ext -32768 [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
+        script_gemaut --reso 4 [--sigma 0.5] [--regul 0.01] [--tile 300] --pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] --mns /chem/vers/MNS_in.tif [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] --RepTra /chem/vers/RepTra --groundval 0 --out /chem/vers/MNT.tif --cpu 56 --clean
         
         \n IMPORTANT
         Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
@@ -923,7 +923,7 @@ def parse_arguments():
     parser.add_argument("--pad", type=int, default=120, help="recouvrement entre tuiles")
     parser.add_argument("--cpu", type=int, required=True, help="nombre de CPUs à utiliser dans le traitement")
     parser.add_argument("--norme", type=str, default="hubertukey", help="choix entre les normes /tukey/huber/hubertukey/L1/L2")
-    parser.add_argument("--nodata_ext", type=int, default=-32768, required=True, help="Valeur du no_data sur les bords de chantier")
+    parser.add_argument("--nodata_ext", type=int, default=-32768, help="Valeur du no_data sur les bords de chantier")
     parser.add_argument("--nodata_int", type=int, default=-32767, help="Valeur du no_data pour les trous à l'intérieur du chantier")
     parser.add_argument("--clean", action='store_true', help="supprimer les fichiers temporaires à la fin du traitement")
     
