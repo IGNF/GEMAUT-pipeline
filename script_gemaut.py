@@ -917,7 +917,7 @@ def parse_arguments():
     parser.add_argument("--RepTra", type=str, required=True, help="repertoire de Travail")
     #
     parser.add_argument("--masque", type=str, help="input ground/above-ground MASK")
-    parser.add_argument("--groundval", type=int, help="valeur de masque pour le SOL (obligatoire si --masque est renseigné)")
+    parser.add_argument("--groundval", default=0, type=int, help="valeur de masque pour le SOL (obligatoire si --masque est renseigné)")
     parser.add_argument("--init", type=str, help="initialisation [par défaut le MNS]")
     parser.add_argument("--nodata_ext", type=int, default=-32768, help="Valeur du no_data sur les bords de chantier")
     parser.add_argument("--nodata_int", type=int, default=-32767, help="Valeur du no_data pour les trous à l'intérieur du chantier")
