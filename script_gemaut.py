@@ -24,7 +24,7 @@ from loguru import logger
 
 os.environ['OMP_NUM_THREADS'] = '1'
 
-cmd_gemo_unit='main_GEMAUT_unit'     
+cmd_gemo_unit='main_GEMAUT_unit'  
 
 ####################################################################################################
 def GetNbLignes(chemMNS):
