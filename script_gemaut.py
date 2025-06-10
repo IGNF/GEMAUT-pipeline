@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, os, time, shutil
+import sys
+import os
+import time
+import shutil
 from SAGA.script_saga_ground_extraction import main_saga_ground_extraction
 import subprocess
 import argparse
 import rasterio
 from rasterio.windows import Window
 from rasterio.windows import from_bounds
-from rasterio.merge import merge
-from rasterio.transform import from_origin
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
 import signal
-import time
 import random
 from scipy.spatial import distance_matrix
 from scipy.interpolate import griddata
@@ -106,6 +106,7 @@ def dallage_pente(chem_pente_filtree,chem_pente_par_dallle,taille_carre):
 ##################################################################################################################
 def Raboutage_OTB_BUG(RepTravail_tmp,NbreDalleX,NbreDalleY,chemMNT_OUT):
     #### Assemblage final - avec OTB buggué
+    cmd_blending_otb='otbcli_Mosaic'
     cmd_blending="%s -il " %cmd_blending_otb
                 
     ## lancement de LSL sur chaque dalle    
@@ -1091,9 +1092,9 @@ def main():
 #==================================================================================================
 # Gestion des exceptions
 #==================================================================================================
-    except (RuntimeError, TypeError, NameError):
+    except (RuntimeError, TypeError, NameError) as e:
         logger.error(f"Erreur: {e}")
-        print ("ERREUR: ", NameError)
+        print("ERREUR:", e)
 
 ####################################################################################################
 if __name__ == "__main__":
