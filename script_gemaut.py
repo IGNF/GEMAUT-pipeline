@@ -927,7 +927,7 @@ def parse_arguments():
     parser.add_argument("--tile", type=int, default=300, help="taille de la tuile")
     parser.add_argument("--pad", type=int, default=120, help="recouvrement entre tuiles")
     parser.add_argument("--norme", type=str, default="hubertukey", help="choix entre les normes /tukey/huber/hubertukey/L1/L2")
-    parser.add_argument("--clean", action='store_true', help="supprimer les fichiers temporaires à la fin du traitement")
+    parser.add_argument("--clean", action='store_true', help="pour supprimer les fichiers temporaires à la fin du traitement")
     
     # Parsing des arguments
     args = parser.parse_args(sys.argv[1:])
