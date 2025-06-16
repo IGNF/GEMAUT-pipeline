@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, os, time, shutil
+import sys
+import os
+import time
+import shutil
 from SAGA.script_saga_ground_extraction import main_saga_ground_extraction
 import subprocess
 import argparse
 import rasterio
 from rasterio.windows import Window
 from rasterio.windows import from_bounds
-from rasterio.merge import merge
-from rasterio.transform import from_origin
 import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
 import signal
-import time
 import random
 from scipy.spatial import distance_matrix
 from scipy.interpolate import griddata
@@ -24,7 +24,7 @@ from loguru import logger
 
 os.environ['OMP_NUM_THREADS'] = '1'
 
-cmd_gemo_unit='main_GEMAUT_unit'     
+cmd_gemo_unit='main_GEMAUT_unit'  
 
 ####################################################################################################
 def GetNbLignes(chemMNS):
@@ -106,6 +106,7 @@ def dallage_pente(chem_pente_filtree,chem_pente_par_dallle,taille_carre):
 ##################################################################################################################
 def Raboutage_OTB_BUG(RepTravail_tmp,NbreDalleX,NbreDalleY,chemMNT_OUT):
     #### Assemblage final - avec OTB buggué
+    cmd_blending_otb='otbcli_Mosaic'
     cmd_blending="%s -il " %cmd_blending_otb
                 
     ## lancement de LSL sur chaque dalle    
@@ -442,55 +443,107 @@ def GetInfo(chemMNS):
 
 ############################################################################################################################         
 def GetNbreDalleXDalleY(chemMNS_SousEch, iTailleparcelle, iTailleRecouvrement):
+    """
+    Calcule le nombre de dalles nécessaires en X et Y.
+    Gère le cas où l'image est plus petite que la taille de dalle demandée.
+    """
     # Ouvrir le fichier raster
     with rasterio.open(chemMNS_SousEch) as src:
         # Obtenir les dimensions de l'image
         NbreCol = src.width  # Nombre de colonnes
         NbreLig = src.height  # Nombre de lignes
-    # Calculer le nombre de dalles en fonction des dimensions et des tailles spécifiées
-    NombreDallesXY = CalculNombreDallesXY(NbreCol, NbreLig, iTailleparcelle, iTailleRecouvrement)
-    NbreDalleX = int(NombreDallesXY[0])
-    NbreDalleY = int(NombreDallesXY[1])
+        
+    logger.info(f"Dimensions de l'image : {NbreCol}x{NbreLig}")
+    logger.info(f"Taille de dalle demandée : {iTailleparcelle}x{iTailleparcelle}")
+    logger.info(f"Recouvrement : {iTailleRecouvrement}")
 
-    return NbreDalleX, NbreDalleY
+    # Si l'image est plus petite que la taille de dalle demandée
+    if NbreCol <= iTailleparcelle and NbreLig <= iTailleparcelle:
+        logger.warning(f"L'image ({NbreCol}x{NbreLig}) est plus petite que la taille de dalle demandée ({iTailleparcelle}x{iTailleparcelle})")
+        logger.warning("Utilisation d'une seule dalle aux dimensions de l'image")
+        return 1, 1
+
+    # Calcul standard pour les grandes images
+    NumX = NbreCol - iTailleparcelle
+    NumY = NbreLig - iTailleparcelle
+    Denom = iTailleparcelle - iTailleRecouvrement
+        
+    # Calcul du nombre de dalles en X        
+    if (NumX <= 0):
+        NbreDalleX = 1
+    elif (NumX % Denom == 0):
+        NbreDalleX = NumX/Denom + 1
+    else: 
+        NbreDalleX = int((NumX/Denom) + 1) + 1
+        
+    # Calcul du nombre de dalles en Y        
+    if (NumY <= 0):
+        NbreDalleY = 1
+    elif (NumY % Denom == 0):
+        NbreDalleY = NumY/Denom + 1
+    else: 
+        NbreDalleY = int((NumY/Denom) + 1) + 1
+    
+    logger.info(f"Nombre de dalles calculé : {NbreDalleX}x{NbreDalleY}")
+    return (int(NbreDalleX), int(NbreDalleY))
 
 #################################################################################################### 
 def RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_value, iNbreCPU):
     
     tasks = []
+    logger.info(f"Début de RunGemoEnParallel dans {RepTravail_tmp}")
+    logger.info(f"Nombre de dalles : {NbreDalleX}x{NbreDalleY}")
+
+    # Vérifier d'abord l'existence du répertoire de travail
+    if not os.path.exists(RepTravail_tmp):
+        raise ValueError(f"Répertoire de travail non trouvé : {RepTravail_tmp}")
 
     for x in range(NbreDalleX):
         for y in range(NbreDalleY):
-            RepDalleXY=os.path.join(RepTravail_tmp,"Dalle_%s_%s"%(x,y))
-            #print(RepDalleXY)                            
-            #fichier out mns
-            ChemOUT_mns=os.path.join(RepDalleXY,"Out_MNS_%s_%s.tif"%(x,y))
-            #print(ChemOUT_mns)    
-            #fichier out masque
-            ChemOUT_masque=os.path.join(RepDalleXY,"Out_MASQUE_%s_%s.tif"%(x,y))
-            #print(ChemOUT_masque)    
-            #fichier out masque
-            ChemOUT_INIT=os.path.join(RepDalleXY,"Out_INIT_%s_%s.tif"%(x,y))
-            #print(ChemOUT_INIT)    
-            #fichier out mnt
-            ChemOUT_mnt=os.path.join(RepDalleXY,"Out_MNT_%s_%s.tif"%(x,y))
-            #print(ChemOUT_mnt)
-            # if os.path.exists(ChemOUT_mns):
-            if contient_donnees(ChemOUT_mns, no_data_value):
-                # cmd_unitaire="%s -i %s %s %s -XG:%2.5f:%2.5f:%s:30000 -o %s -n0 >> /dev/null 2>&1" %(cmdxingng_chem_complet,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,fsigma,flambda,norme,ChemOUT_mnt)
-                # tasks.append(cmd_unitaire)
-                cmd_unitaire="%s %s %s %s %s %2.5f %2.5f %2.5f %s " %(cmd_gemo_unit,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,ChemOUT_mnt,fsigma,flambda,no_data_value,norme)                
-                #print('>> ',cmd_unitaire)                
-                #cmd_unitaire="%s %s %s %s %s %2.5f %2.5f %2.5f %s >> /dev/null 2>&1 " %(cmd_gemo_unit,ChemOUT_mns,ChemOUT_masque,ChemOUT_INIT,ChemOUT_mnt,fsigma,flambda,no_data_value,norme)                
-                #print('>> ',cmd_unitaire)
-                tasks.append(cmd_unitaire)
-            else:
-                shutil.copyfile(ChemOUT_mns, ChemOUT_mnt)
+            RepDalleXY = os.path.join(RepTravail_tmp, f"Dalle_{x}_{y}")
+            logger.debug(f"Vérification de la dalle {x},{y} dans {RepDalleXY}")
 
-	# Initialize the pool
+            if not os.path.exists(RepDalleXY):
+                logger.warning(f"Répertoire de dalle manquant : {RepDalleXY}")
+                continue
+
+            ChemOUT_mns = os.path.join(RepDalleXY, f"Out_MNS_{x}_{y}.tif")
+            ChemOUT_masque = os.path.join(RepDalleXY, f"Out_MASQUE_{x}_{y}.tif")
+            ChemOUT_INIT = os.path.join(RepDalleXY, f"Out_INIT_{x}_{y}.tif")
+            ChemOUT_mnt = os.path.join(RepDalleXY, f"Out_MNT_{x}_{y}.tif")
+
+            # Vérifier l'existence des fichiers nécessaires
+            if not os.path.exists(ChemOUT_mns):
+                logger.error(f"Fichier MNS manquant : {ChemOUT_mns}")
+                continue
+
+            try:
+                if contient_donnees(ChemOUT_mns, no_data_value):
+                    cmd_unitaire = f"{cmd_gemo_unit} {ChemOUT_mns} {ChemOUT_masque} {ChemOUT_INIT} {ChemOUT_mnt} {fsigma} {flambda} {no_data_value} {norme}"
+                    logger.debug(f"Ajout de la commande : {cmd_unitaire}")
+                    tasks.append(cmd_unitaire)
+                else:
+                    logger.info(f"Dalle {x},{y} sans données valides, copie directe")
+                    shutil.copyfile(ChemOUT_mns, ChemOUT_mnt)
+            except Exception as e:
+                logger.error(f"Erreur lors du traitement de la dalle {x},{y}: {str(e)}")
+                continue
+
+    if not tasks:
+        logger.warning("Aucune tâche à exécuter !")
+        return
+
+    logger.info(f"Lancement de {len(tasks)} tâches en parallèle")
     with Pool(processes=iNbreCPU, initializer=init_worker) as pool:
-        results = list(tqdm(pool.imap_unordered(os.system, tasks), total=len(tasks), desc="Lancement de GEMO unitaire en parallèle"))
-		      
+        try:
+            results = list(tqdm(pool.imap_unordered(os.system, tasks), 
+                              total=len(tasks), 
+                              desc="Lancement de GEMO unitaire en parallèle"))
+            logger.info("Traitement parallèle terminé avec succès")
+        except Exception as e:
+            logger.error(f"Erreur durant le traitement parallèle : {str(e)}")
+            raise
+
     return
 
 ####################################################################################################
@@ -510,107 +563,174 @@ def contient_donnees(chem_mns, no_data_value=-9999):
 ####################################################################################################
 def Decoupe_dalle(args):
     """
-    Fonction qui traite une dalle sur les 3 entrées de GEMO: mns_file / masque_file et init_file. 
-    Conçue pour être utilisée avec multiprocessing.
-    :param args: Tuple contenant (mns_file, masque_file, init_file
-                 col_dalle, lig_dalle, x_offset, y_offset, l_dalle, h_dalle
-                 -- A PRIORI NE GERE PAS LE NO DATA no_data_value
-                 RepTravail_tmp).
-    :return: Résultat du traitement (ou message).
+    Fonction qui traite une dalle sur les 3 entrées de GEMO.
     """
     mns_file, masque_file, init_file, col_dalle, lig_dalle, x_offset, y_offset, l_dalle, h_dalle, no_data_value, RepTravail_tmp = args
 
     try:
-        #print('création rep ', RepTravail_tmp)
-        if not os.path.isdir(RepTravail_tmp): 
-            os.mkdir(RepTravail_tmp)
-    except Exception as e:
-        print(f"Erreur lors de la création du répertoire : {e}")
-
-    # Lire les trois images avec rasterio
-    with rasterio.open(mns_file) as mns_src, \
-         rasterio.open(masque_file) as masque_src, \
-         rasterio.open(init_file) as init_src:
-        
-        # Lire la dalle de MNS pour vérifier si elle contient des données valides
-        mns_dalle = mns_src.read(1, window=Window(x_offset, y_offset, l_dalle, h_dalle))
-   
-        masque_dalle = masque_src.read(1, window=Window(x_offset, y_offset, l_dalle, h_dalle))
-        init_dalle = init_src.read(1, window=Window(x_offset, y_offset, l_dalle, h_dalle))
-
-        # Construire le chemin pour enregistrer les dalles en utilisant x et y
         RepDalleXY = os.path.join(RepTravail_tmp, f"Dalle_{col_dalle}_{lig_dalle}")
-        os.makedirs(RepDalleXY, exist_ok=True)
+        logger.info(f"Traitement de la dalle {col_dalle}_{lig_dalle}")
+        logger.debug(f"Paramètres: offset=({x_offset},{y_offset}), taille=({l_dalle},{h_dalle})")
 
-        # Créer et sauvegarder les trois dalles (MNS, Masque, Initialisation)
-        fichiers_dalles = {
-            "mns": os.path.join(RepDalleXY, f"Out_MNS_{col_dalle}_{lig_dalle}.tif"),
-            "masque": os.path.join(RepDalleXY, f"Out_MASQUE_{col_dalle}_{lig_dalle}.tif"),
-            "init": os.path.join(RepDalleXY, f"Out_INIT_{col_dalle}_{lig_dalle}.tif")
-        }
+        # Créer le répertoire de la dalle
+        os.makedirs(RepDalleXY, exist_ok=True)
+        logger.debug(f"Répertoire créé/vérifié : {RepDalleXY}")
+
+        # Vérifier l'existence des fichiers source
+        for f in [mns_file, masque_file, init_file]:
+            if not os.path.exists(f):
+                logger.error(f"Fichier source manquant : {f}")
+                raise FileNotFoundError(f"Fichier source manquant : {f}")
+
+        # Lire et découper les trois images
+        with rasterio.open(mns_file) as mns_src, \
+             rasterio.open(masque_file) as masque_src, \
+             rasterio.open(init_file) as init_src:
+            
+            # Si l'image est plus petite que la taille de dalle demandée,
+            # utiliser les dimensions de l'image
+            if l_dalle > mns_src.width:
+                l_dalle = mns_src.width
+                logger.warning(f"Largeur de dalle ajustée à la largeur de l'image : {l_dalle}")
+            if h_dalle > mns_src.height:
+                h_dalle = mns_src.height
+                logger.warning(f"Hauteur de dalle ajustée à la hauteur de l'image : {h_dalle}")
+
+            window = Window(x_offset, y_offset, l_dalle, h_dalle)
+            logger.debug(f"Fenêtre de lecture : {window}")
+            
+            # Lire les dalles
+            try:
+                mns_dalle = mns_src.read(1, window=window)
+                masque_dalle = masque_src.read(1, window=window)
+                init_dalle = init_src.read(1, window=window)
+                logger.debug(f"Dalles lues avec succès: shapes={mns_dalle.shape}")
+            except Exception as e:
+                logger.error(f"Erreur lors de la lecture des dalles : {e}")
+                raise
+
+            # Construire les chemins de sortie
+            fichiers_dalles = {
+                "mns": os.path.join(RepDalleXY, f"Out_MNS_{col_dalle}_{lig_dalle}.tif"),
+                "masque": os.path.join(RepDalleXY, f"Out_MASQUE_{col_dalle}_{lig_dalle}.tif"),
+                "init": os.path.join(RepDalleXY, f"Out_INIT_{col_dalle}_{lig_dalle}.tif")
+            }
+            
+            # Sauvegarder les dalles
+            for name, dalle, src in zip(fichiers_dalles.keys(), [mns_dalle, masque_dalle, init_dalle], [mns_src, masque_src, init_src]):
+                profil = src.profile.copy()
+                profil.update({
+                    'height': h_dalle,
+                    'width': l_dalle,
+                    'transform': src.window_transform(window)
+                })
                 
-        # Sauvegarder les dalles dans des fichiers TIFF
-        for name, dalle, src in zip(fichiers_dalles.keys(), [mns_dalle, masque_dalle, init_dalle], [mns_src, masque_src, init_src]):
-            profil = src.profile
-            profil.update({
-                'height': h_dalle,
-                'width': l_dalle,
-                'transform': src.window_transform(Window(x_offset, y_offset, l_dalle, h_dalle))
-            })
-                
-            # Sauvegarde de la dalle
-            with rasterio.open(fichiers_dalles[name], 'w', **profil) as dst:
-                dst.write(dalle, 1)
+                try:
+                    with rasterio.open(fichiers_dalles[name], 'w', **profil) as dst:
+                        dst.write(dalle, 1)
+                    logger.debug(f"Dalle {name} sauvegardée : {fichiers_dalles[name]}")
+                except Exception as e:
+                    logger.error(f"Erreur lors de la sauvegarde de la dalle {name} : {e}")
+                    raise
+
+            logger.info(f"Dalle {col_dalle}_{lig_dalle} traitée avec succès")
+            return True
+
+    except Exception as e:
+        logger.error(f"Erreur lors du traitement de la dalle {col_dalle}_{lig_dalle}: {str(e)}")
+        raise
 
 #################################################################################################### 
 # Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
 def Decoupe_chantier(mns_file, masque_file, init_file, taille_dalle, iTailleRecouvrement, no_data_value, RepTravail_tmp, iNbreCPU):
     """
-    Traite trois grandes images (MNS, Masque, Initialisation) en découpant en dalles avec chevauchement,
-    et en utilisant multiprocessing pour accélérer le traitement, avec une barre de progression.
-    :param mns_file: Chemin vers l'image MNS.
-    :param masque_file: Chemin vers l'image de Masque.
-    :param init_file: Chemin vers l'image d'Initialisation.
-    :param taille_dalle: Tuple représentant la taille des dalles (hauteur, largeur).
-    :param iTailleRecouvrement: Taille du recouvrement entre dalles en pixels.
-    :param no_data_value: Valeur représentant "no data" pour MNS.
-    :param RepTravail_tmp: Répertoire temporaire où enregistrer les dalles traitées.
+    Traite trois grandes images en découpant en dalles avec chevauchement.
     """
+    logger.info(f"Début de Decoupe_chantier avec:")
+    logger.info(f"- MNS: {mns_file}")
+    logger.info(f"- Masque: {masque_file}")
+    logger.info(f"- Init: {init_file}")
+    logger.info(f"- Répertoire temp: {RepTravail_tmp}")
+
+    # Vérifier et créer le répertoire de travail principal
+    if not os.path.exists(RepTravail_tmp):
+        try:
+            os.makedirs(RepTravail_tmp)
+            logger.info(f"Répertoire de travail créé : {RepTravail_tmp}")
+        except Exception as e:
+            logger.error(f"Impossible de créer le répertoire de travail : {e}")
+            raise
 
     with rasterio.open(mns_file) as mns_src:
         largeur = mns_src.width
         hauteur = mns_src.height
+        logger.info(f"DEBUG - Dimensions MNS: {largeur}x{hauteur}")
 
-        h_dalle, l_dalle = taille_dalle  # Hauteur et largeur des dalles
+        h_dalle, l_dalle = taille_dalle
+        logger.info(f"DEBUG - Taille dalle: {h_dalle}x{l_dalle}")
 
-        # Calculer le pas entre les dalles en fonction du recouvrement
-        pas_x = l_dalle - iTailleRecouvrement  # Pas en X
-        pas_y = h_dalle - iTailleRecouvrement  # Pas en Y
+        # Si l'image est plus petite que la taille de dalle
+        if largeur <= l_dalle or hauteur <= h_dalle:
+            logger.warning(f"MNS ({largeur}x{hauteur}) plus petit que la taille de dalle ({l_dalle}x{h_dalle})")
+            logger.warning("Utilisation d'une seule dalle aux dimensions du MNS")
+            NbreDalleX = 1
+            NbreDalleY = 1
+            # Ajuster la taille de dalle aux dimensions du MNS
+            l_dalle = largeur
+            h_dalle = hauteur
+            taille_dalle = (h_dalle, l_dalle)
+        else:
+            # Calculer le pas entre les dalles en fonction du recouvrement
+            pas_x = l_dalle - iTailleRecouvrement
+            pas_y = h_dalle - iTailleRecouvrement
+            logger.info(f"DEBUG - Pas: {pas_x}x{pas_y}, Recouvrement: {iTailleRecouvrement}")
 
-        # Calculer le nombre de dalles avec recouvrement
-        NbreDalleX = (largeur - iTailleRecouvrement + pas_x - 1) // pas_x
-        NbreDalleY = (hauteur - iTailleRecouvrement + pas_y - 1) // pas_y
+            # Calculer le nombre de dalles avec recouvrement
+            NbreDalleX = max(1, (largeur - iTailleRecouvrement + pas_x - 1) // pas_x)
+            NbreDalleY = max(1, (hauteur - iTailleRecouvrement + pas_y - 1) // pas_y)
 
-        # Créer une liste des paramètres pour chaque dalle avec un compteur d'index
-        params = []
-        # index = 0  # Initialiser un compteur d'index global
+        logger.info(f"DEBUG - Nombre de dalles: {NbreDalleX}x{NbreDalleY}")
+
+        # Créer tous les répertoires des dalles avant le traitement parallèle
+        logger.info("DEBUG - Création des répertoires des dalles...")
         for x in range(NbreDalleX):
             for y in range(NbreDalleY):
-                # Calculer la position (x, y) pour chaque dalle en fonction du pas
-                x_offset = x * pas_x
-                y_offset = y * pas_y
+                RepDalleXY = os.path.join(RepTravail_tmp, f"Dalle_{x}_{y}")
+                try:
+                    os.makedirs(RepDalleXY, exist_ok=True)
+                    logger.debug(f"Répertoire créé : {RepDalleXY}")
+                except Exception as e:
+                    logger.error(f"Impossible de créer le répertoire {RepDalleXY}: {e}")
+                    raise
 
-                # Calculer la largeur et hauteur de chaque bloc en respectant les bords
-                l_bloc = min(l_dalle, largeur - x_offset)
-                h_bloc = min(h_dalle, hauteur - y_offset)
-
-                # Ajouter les paramètres pour traiter cette dalle
+        # Créer une liste des paramètres pour chaque dalle
+        params = []
+        for x in range(NbreDalleX):
+            for y in range(NbreDalleY):
+                if NbreDalleX == 1 and NbreDalleY == 1:
+                    # Cas d'une seule dalle : utiliser toute l'image
+                    x_offset = 0
+                    y_offset = 0
+                    l_bloc = largeur
+                    h_bloc = hauteur
+                else:
+                    # Calcul normal pour plusieurs dalles
+                    x_offset = x * pas_x
+                    y_offset = y * pas_y
+                    l_bloc = min(l_dalle, largeur - x_offset)
+                    h_bloc = min(h_dalle, hauteur - y_offset)
+                
                 params.append((mns_file, masque_file, init_file, x, y, x_offset, y_offset, l_bloc, h_bloc, no_data_value, RepTravail_tmp))
-        
-        # Utiliser multiprocessing pour traiter les dalles en parallèle avec une barre de progression
+                logger.debug(f"Dalle_{x}_{y}: offset=({x_offset},{y_offset}), taille=({l_bloc},{h_bloc})")
+
+        # Utiliser multiprocessing pour traiter les dalles en parallèle
         with Pool(processes=iNbreCPU) as pool:
-            # Utiliser tqdm pour la barre de progression
-            results = list(tqdm(pool.imap_unordered(Decoupe_dalle, params), total=len(params), desc="- Traitement des dalles -"))
+            try:
+                results = list(tqdm(pool.imap_unordered(Decoupe_dalle, params), total=len(params), desc="- Traitement des dalles -"))
+                logger.info("Découpage des dalles terminé avec succès")
+            except Exception as e:
+                logger.error(f"Erreur lors du découpage des dalles : {str(e)}")
+                raise
 
 ####################################################################################################
 def fill_holes_with_interpolation(chemMNS_IN, no_data_int, no_data_ext, e, weight_type, chemMNS_filled):
@@ -915,9 +1035,9 @@ def parse_arguments():
     parser.add_argument("--reso", type=float, required=True, default=4, help="resolution du MNT en sortie")
     parser.add_argument("--cpu", type=int, required=True, help="nombre de CPUs à utiliser dans le traitement")
     parser.add_argument("--RepTra", type=str, required=True, help="repertoire de Travail")
-    #
+    # 
     parser.add_argument("--masque", type=str, help="input ground/above-ground MASK")
-    parser.add_argument("--groundval", type=int, help="valeur de masque pour le SOL (obligatoire si --masque est renseigné)")
+    parser.add_argument("--groundval", default=0, type=int, help="valeur de masque pour le SOL (obligatoire si --masque est renseigné)")
     parser.add_argument("--init", type=str, help="initialisation [par défaut le MNS]")
     parser.add_argument("--nodata_ext", type=int, default=-32768, help="Valeur du no_data sur les bords de chantier")
     parser.add_argument("--nodata_int", type=int, default=-32767, help="Valeur du no_data pour les trous à l'intérieur du chantier")
@@ -926,7 +1046,7 @@ def parse_arguments():
     parser.add_argument("--tile", type=int, default=300, help="taille de la tuile")
     parser.add_argument("--pad", type=int, default=120, help="recouvrement entre tuiles")
     parser.add_argument("--norme", type=str, default="hubertukey", help="choix entre les normes /tukey/huber/hubertukey/L1/L2")
-    parser.add_argument("--clean", action='store_true', help="supprimer les fichiers temporaires à la fin du traitement")
+    parser.add_argument("--clean", action='store_true', help="pour supprimer les fichiers temporaires à la fin du traitement")
     
     # Parsing des arguments
     args = parser.parse_args(sys.argv[1:])
@@ -992,6 +1112,8 @@ def main():
         chemMNT_OUT_tmp=os.path.join(RepTravail_tmp,'OUT_MNT_tmp.tif')
         chemINIT_SousEch=os.path.join(RepTravail_tmp,'INIT.tif')
         Chem_RepTra_SAGA=os.path.join(RepTravail_tmp,'RepTra_SAGA')
+
+        #
         if not os.path.isdir(Chem_RepTra_SAGA): 
             os.mkdir(Chem_RepTra_SAGA)
         else:
@@ -1028,7 +1150,7 @@ def main():
             chemMASQUE=args.masque
         
         # On utilise foreval pour être dans la convention de GEMO: SOL = 0 / SURSOL =255
-        logger.info("Étiquetage et remplissage des valeurs NoData.")
+        logger.info("Etiquetage et remplissage des valeurs NoData.")
         Set_groundval_mask_to_0(chemMASQUE, groundval, chemMASQUE_4gemo)
 
         # Affectation d'une valeur spécifique pour gérer les bords de chantier = 11 (no_data_interne_mask)
@@ -1042,25 +1164,56 @@ def main():
         logger.info(f"Commande GDAL: {cmd_SousEch_MNS}")
         run_task_sans_SORTIEMESSAGE(cmd_SousEch_MNS)
         
+        if not os.path.exists(chemMNS_SousEch_tmp):
+            raise FileNotFoundError(f"Le fichier sous-échantillonné n'a pas été créé : {chemMNS_SousEch_tmp}")
+        
         ## SousEch de MASQUE
         cmd_SousEch_MASQUE="gdalwarp -tr %2.10f %2.10f -srcnodata %d -dstnodata %d %s %s -ot Byte -overwrite " %(reso_travail,reso_travail,no_data_interne_mask,no_data_interne_mask,chemMASQUE_nodata,chemMASQUE_SousEch)
         logger.info(f"Commande GDAL: {cmd_SousEch_MASQUE}")
         run_task_sans_SORTIEMESSAGE(cmd_SousEch_MASQUE)
+        
+        if not os.path.exists(chemMASQUE_SousEch):
+            raise FileNotFoundError(f"Le fichier masque sous-échantillonné n'a pas été créé : {chemMASQUE_SousEch}")
         
         chemINIT = chemMNS if args.init is None else args.init
         logger.info(f"Initialisation avec : {chemINIT}.")
         
         # SousEch de INIT
         cmd_SousEch_INIT="gdalwarp -tr %2.10f %2.10f -srcnodata %d -dstnodata %d %s %s -overwrite " %(reso_travail,reso_travail,no_data_ext,no_data_ext,chemINIT,chemINIT_SousEch)
-        logger.info(f"cmd_SousEch_INIT : {cmd_SousEch_INIT}.")
+        logger.info(f"Commande GDAL: {cmd_SousEch_INIT}")
         run_task_sans_SORTIEMESSAGE(cmd_SousEch_INIT)
+        
+        if not os.path.exists(chemINIT_SousEch):
+            raise FileNotFoundError(f"Le fichier d'initialisation sous-échantillonné n'a pas été créé : {chemINIT_SousEch}")
         
         logger.info("Calcul du nombre de dalles.")       
         NbreDalleX, NbreDalleY = GetNbreDalleXDalleY(chemMNS_SousEch_tmp,iTailleparcelle,iTailleRecouvrement)
+        print('-------------------------------- ', NbreDalleX, NbreDalleY)
+        print(f"Nombre de dalles - TEST : {NbreDalleX}x{NbreDalleY}")
+        logger.info(f"Nombre de dalles - TEST : {NbreDalleX}x{NbreDalleY}")
                 
         logger.info("Découpage des dalles pour chantier GEMO.")  
         taille_dalle=(iTailleparcelle,iTailleparcelle)
-        Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
+        try:
+            Decoupe_chantier(chemMNS_SousEch_tmp, chemMASQUE_SousEch, chemINIT_SousEch, taille_dalle, iTailleRecouvrement, no_data_ext, RepTravail_tmp, iNbreCPU)
+            
+            # Vérifier que les dalles ont bien été créées
+            dalles_manquantes = []
+            for x in range(NbreDalleX):
+                for y in range(NbreDalleY):
+                    RepDalleXY = os.path.join(RepTravail_tmp, f"Dalle_{x}_{y}")
+                    if not os.path.exists(RepDalleXY):
+                        dalles_manquantes.append(f"Dalle_{x}_{y}")
+                    else:
+                        files = os.listdir(RepDalleXY)
+                        logger.debug(f"Contenu de Dalle_{x}_{y}: {files}")
+            
+            if dalles_manquantes:
+                raise RuntimeError(f"Les dalles suivantes n'ont pas été créées : {', '.join(dalles_manquantes)}")
+            
+        except Exception as e:
+            logger.error(f"Erreur lors du découpage des dalles : {str(e)}")
+            raise
 
         logger.info("Exécution parallèle de GEMO.")
         RunGemoEnParallel(RepTravail_tmp, NbreDalleX, NbreDalleY, fsigma, flambda, norme, no_data_ext, iNbreCPU)
@@ -1091,9 +1244,9 @@ def main():
 #==================================================================================================
 # Gestion des exceptions
 #==================================================================================================
-    except (RuntimeError, TypeError, NameError):
+    except (RuntimeError, TypeError, NameError) as e:
         logger.error(f"Erreur: {e}")
-        print ("ERREUR: ", NameError)
+        print("ERREUR:", e)
 
 ####################################################################################################
 if __name__ == "__main__":
