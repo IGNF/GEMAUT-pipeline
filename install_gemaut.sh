@@ -204,9 +204,9 @@ main() {
     echo ""
     echo "    conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
     echo ""
-
+    log_info "Pour utiliser GEMAUT, tapez:"
     echo ""
-    log_info "Pour utiliser GEMAUT, tapez: script_gemaut --help"
+    echo "    script_gemaut --help"
     echo ""
 }
 
