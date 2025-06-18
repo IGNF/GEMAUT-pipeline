@@ -5,7 +5,22 @@ export SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
 export GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
 
 # Configuration des bibliothèques (PRIORITÉ aux libs systèmes !)
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SAGA_INSTALL_DIR/lib64
+
+# Détection automatique du bon répertoire de bibliothèques
+if [ -d "$SAGA_INSTALL_DIR/lib64" ]; then
+    SAGA_LIB_DIR="$SAGA_INSTALL_DIR/lib64"
+elif [ -d "$SAGA_INSTALL_DIR/lib" ]; then
+    SAGA_LIB_DIR="$SAGA_INSTALL_DIR/lib"
+else
+    echo "[ERROR] Aucun répertoire lib ou lib64 trouvé dans $SAGA_INSTALL_DIR"
+    exit 1
+fi
+
+# Génère le script d'activation avec le bon chemin
+cat > "$CONDA_PREFIX/etc/conda/activate.d/env_vars.sh" <<EOF
+export LD_LIBRARY_PATH=$SAGA_LIB_DIR:\$CONDA_PREFIX/lib:\$LD_LIBRARY_PATH
+EOF
+
 export PROJ_LIB=$CONDA_PREFIX/share/proj
 
 # Ajouter les binaires de SAGA et GEMAUT au PATH
