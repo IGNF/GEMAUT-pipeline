@@ -1,24 +1,23 @@
 #!/bin/bash
 
-# Suppression des variables d'environnement
+# Nettoyage des variables spécifiques à GEMAUT
 unset SAGA_INSTALL_DIR
 unset GEMAUT_INSTALL_DIR
-unset LD_LIBRARY_PATH
 unset PROJ_LIB
 
-# Suppression propre des chemins ajoutés au PATH
-if [[ -n "$SAGA_INSTALL_DIR" ]]; then
-    export PATH=${PATH//"$SAGA_INSTALL_DIR/bin:"/}
-fi
+# Nettoyage PATH
+export PATH=${PATH//"$HOME\/GEMAUT\/saga_install\/bin:"/}
+export PATH=${PATH//"$HOME\/GEMAUT\/GEMO\/bin:"/}
 
-if [[ -n "$GEMAUT_INSTALL_DIR" ]]; then
-    export PATH=${PATH//"$GEMAUT_INSTALL_DIR/bin:"/}
-fi
+# Nettoyage LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//"$HOME\/GEMAUT\/saga_install\/lib64:"/}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//":$HOME\/GEMAUT\/saga_install\/lib64"/}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//"$HOME\/GEMAUT\/saga_install\/lib:"/}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//":$HOME\/GEMAUT\/saga_install\/lib"/}
 
-# Suppression du lien symbolique de script_gemaut.py
-rm -f $CONDA_PREFIX/bin/script_gemaut
-
-rm -f $CONDA_PREFIX/bin/saga_cmd
+# Suppression des liens symboliques si présents
+rm -f "$CONDA_PREFIX/bin/script_gemaut"
+rm -f "$CONDA_PREFIX/bin/saga_cmd"
 
 echo "GEMAUT and SAGA environment deactivated."
 
