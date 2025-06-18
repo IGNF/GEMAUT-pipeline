@@ -199,7 +199,15 @@ main() {
     source "$CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh"
     
     log_info "Installation terminée avec succès!"
+
+    log_info "Veuillez exécuter la commande suivante pour recharger l'environnement :"
+    echo ""
+    echo "    conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
+    echo ""
+
+    echo ""
     log_info "Pour utiliser GEMAUT, tapez: script_gemaut --help"
+    echo ""
 }
 
 # Exécution du programme principal
