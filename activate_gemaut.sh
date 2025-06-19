@@ -34,6 +34,6 @@ if [ ! -f "$CONDA_PREFIX/bin/saga_cmd" ]; then
     ln -sf $SAGA_INSTALL_DIR/bin/saga_cmd $CONDA_PREFIX/bin/saga_cmd
 fi
 
-echo "✅ GEMAUT and SAGA environment activated."
+echo "GEMAUT and SAGA environment activated."
 
 
