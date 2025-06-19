@@ -66,7 +66,7 @@ install_saga() {
     
     # Cloner SAGA-GIS (version 7.9.0 qui est compatible avec wxWidgets 3.0)
     log_info "Clonage de SAGA-GIS..."
-    if ! git clone --branch release-7.9.0 --depth 1 https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
+    if ! git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
         log_error "Échec du clonage de SAGA-GIS"
         exit 1
     fi
