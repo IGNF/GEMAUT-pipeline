@@ -64,9 +64,9 @@ install_saga() {
         rm -rf saga-gis-code
     fi
     
-    # Cloner SAGA-GIS
+    # Cloner SAGA-GIS (version 7.9.0 qui est compatible avec wxWidgets 3.0)
     log_info "Clonage de SAGA-GIS..."
-    if ! git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
+    if ! git clone --branch release-7.9.0 --depth 1 https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
         log_error "Échec du clonage de SAGA-GIS"
         exit 1
     fi
@@ -94,9 +94,13 @@ install_saga() {
     # Créer et entrer dans le répertoire build
     mkdir build && cd build
     
-    # Configuration et compilation
+    # Configuration et compilation avec options spécifiques pour CentOS 7
     log_info "Configuration de SAGA-GIS..."
-    if ! cmake -DCMAKE_INSTALL_PREFIX="$SAGA_INSTALL_DIR" ..; then
+    if ! cmake -DCMAKE_BUILD_TYPE=Release \
+               -DCMAKE_INSTALL_PREFIX="$SAGA_INSTALL_DIR" \
+               -DWITH_GUI=OFF \
+               -DWITH_PYTHON=ON \
+               ..; then
         log_error "Échec de la configuration CMake"
         exit 1
     fi
@@ -204,6 +208,14 @@ main() {
     echo ""
     echo "    conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
     echo ""
+    
+    # Message spécial pour les vieux systèmes
+    echo -e "${YELLOW}Note for old systems (e.g. CentOS 7):${NC}"
+    echo -e "${YELLOW}You might need to set up the library path by running:${NC}"
+    echo ""
+    echo "    export LD_LIBRARY_PATH=/usr/lib64:\$CONDA_PREFIX/lib:\$HOME/GEMAUT/saga_install/lib64:\$LD_LIBRARY_PATH"
+    echo ""
+    
     log_info "Pour utiliser GEMAUT, tapez:"
     echo ""
     echo "    script_gemaut --help"
