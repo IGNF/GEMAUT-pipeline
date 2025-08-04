@@ -143,6 +143,11 @@ install_gemaut() {
 setup_conda_env() {
     log_info "Configuration de l'environnement conda..."
     
+    # Installer les dépendances Python
+    log_info "Installation des dépendances Python..."
+    conda install -y pyyaml
+    conda install -y rasterio numpy scipy tqdm loguru
+    
     # Créer les répertoires pour les scripts d'activation/désactivation
     mkdir -p "$CONDA_PREFIX/etc/conda/activate.d"
     mkdir -p "$CONDA_PREFIX/etc/conda/deactivate.d"

@@ -1,0 +1,52 @@
+name: gemaut_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python et dépendances de base
+  - python>=3.8
+  - pyyaml>=6.0
+  - numpy
+  - scipy
+  - tqdm
+  - loguru
+  
+  # Géospatial et raster
+  - rasterio
+  - gdal
+  - proj
+  - geos
+  - sqlite
+  - libgdal
+  
+  # Traitement de données
+  - pdal
+  - python-pdal
+  - hdf5
+  
+  # Bibliothèques scientifiques (nécessaires pour GEMO)
+  - gsl
+  - eigen
+  - suitesparse
+  - tbb-devel
+  
+  # Vision par ordinateur (nécessaire pour GEMO)
+  - opencv
+  - libopencv
+  - py-opencv
+  
+  # Interface graphique (pour SAGA)
+  - wxwidgets
+  
+  # Outils de compilation
+  - cmake
+  - make
+  - git
+  - gcc_linux-64
+  - gxx_linux-64
+  - pkg-config
+  
+  # Pip packages
+  - pip
+  - pip:
+    - pdal-plugins 
