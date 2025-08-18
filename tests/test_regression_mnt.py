@@ -118,7 +118,7 @@ class TestMNTRegression(unittest.TestCase):
             nodata = src.nodata
         return data, profile, transform, crs, nodata
     
-    def compare_rasters(self, raster1_path, raster2_path, tolerance=1e-6):
+    def compare_rasters(self, raster1_path, raster2_path, tolerance=1e-2):
         """Compare deux rasters et retourne les différences"""
         data1, profile1, transform1, crs1, nodata1 = self.load_raster_data(raster1_path)
         data2, profile2, transform2, crs2, nodata2 = self.load_raster_data(raster2_path)
@@ -182,21 +182,21 @@ class TestMNTRegression(unittest.TestCase):
         self.assertTrue(comparison['metadata_match']['transform'], 
                        "La transformation géométrique doit être identique")
         
-        # Tolérance pour les différences numériques (ajustée pour être plus réaliste)
-        self.assertLess(comparison['max_diff'], 5.0, 
-                       f"La différence maximale ({comparison['max_diff']:.6f}) doit être < 5.0")
-        self.assertLess(comparison['mean_diff'], 1.0, 
-                       f"La différence moyenne ({comparison['mean_diff']:.6f}) doit être < 1.0")
+        # Tolérance réaliste pour les différences numériques (précision centimétrique)
+        self.assertLess(comparison['max_diff'], 0.1, 
+                       f"La différence maximale ({comparison['max_diff']:.6f}) doit être < 0.1 m (10 cm)")
+        self.assertLess(comparison['mean_diff'], 0.01, 
+                       f"La différence moyenne ({comparison['mean_diff']:.6f}) doit être < 0.01 m (1 cm)")
         
-        # Pourcentage de pixels différents - plus permissif car les paramètres peuvent varier
-        if comparison['percent_different'] > 50.0:
+        # Pourcentage de pixels différents - tolérance réaliste
+        if comparison['percent_different'] > 5.0:
             logger.warning(f"⚠️  Attention: {comparison['percent_different']:.2f}% de pixels différents")
-            logger.warning("   Cela peut indiquer des différences de paramètres ou de versions")
-            logger.warning("   Vérifiez que les paramètres correspondent à la référence")
+            logger.warning("   Avec une tolérance de 1 cm, ce pourcentage devrait être < 5%")
+            logger.warning("   Vérifiez les paramètres et versions des logiciels")
         
-        # On ne fait pas échouer le test pour le pourcentage, juste un warning
-        # self.assertLess(comparison['percent_different'], 50.0, 
-        #                f"Le pourcentage de pixels différents ({comparison['percent_different']:.2f}%) doit être < 50%")
+        # Test du pourcentage de pixels différents avec tolérance réaliste
+        self.assertLess(comparison['percent_different'], 5.0, 
+                       f"Le pourcentage de pixels différents ({comparison['percent_different']:.2f}%) doit être < 5% (tolérance 1 cm)")
         
         logger.info("✅ Test de régression MNT réussi")
     
@@ -300,8 +300,8 @@ class TestMNTRegression(unittest.TestCase):
             'std': np.std(test_data[test_valid])
         }
         
-        # Comparer les statistiques (tolérance de 10%)
-        tolerance = 0.1
+        # Comparer les statistiques (tolérance stricte de 1% pour calcul exact)
+        tolerance = 0.01
         for stat in ['min', 'max', 'mean', 'std']:
             ref_val = ref_stats[stat]
             test_val = test_stats[stat]
@@ -309,8 +309,8 @@ class TestMNTRegression(unittest.TestCase):
             
             logger.info(f"   {stat}: référence={ref_val:.3f}, test={test_val:.3f}, diff={diff_percent:.2f}%")
             
-            self.assertLess(diff_percent, 10.0, 
-                           f"La différence pour {stat} ({diff_percent:.2f}%) doit être < 10%")
+            self.assertLess(diff_percent, 1.0, 
+                           f"La différence pour {stat} ({diff_percent:.2f}%) doit être < 1% (calcul exact)")
         
         logger.info("✅ Test de cohérence statistique réussi")
 
