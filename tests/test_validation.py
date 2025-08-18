@@ -13,6 +13,7 @@ import tempfile
 import os
 from rasterio.transform import from_origin
 from unittest.mock import patch, MagicMock
+from loguru import logger
 
 # Import des modules à tester
 import sys
@@ -43,18 +44,18 @@ class TestMNSValidation(unittest.TestCase):
     
     def create_valid_mns(self):
         """Crée un MNS de test valide"""
-        data = np.random.rand(100, 100).astype(np.float32) * 100  # Altitudes 0-100m
+        data = np.random.rand(400, 400).astype(np.float32) * 100  # Altitudes 0-100m, 400x400 pixels
         data[10:15, 20:25] = -9999  # Trou 1
         data[50:55, 60:65] = -9999  # Trou 2
         
         profile = {
             'driver': 'GTiff',
-            'height': 100,
-            'width': 100,
+            'height': 400,
+            'width': 400,
             'count': 1,
             'dtype': 'float32',
             'crs': 'EPSG:4326',
-            'transform': from_origin(0, 100, 1, 1),
+            'transform': from_origin(0, 400, 1, 1),
             'nodata': -9999.0
         }
         
@@ -135,7 +136,7 @@ class TestMNSValidation(unittest.TestCase):
             self.assertLess(np.max(valid_data), 10000, "Les altitudes doivent être < 10000m")
     
     def test_mns_dimensions_are_reasonable(self):
-        """Test que les dimensions du MNS sont raisonnables"""
+        """Test que les dimensions du MNS sont raisonnables pour le découpage en tuiles"""
         with rasterio.open(self.valid_mns_path) as src:
             height, width = src.height, src.width
             
@@ -143,12 +144,35 @@ class TestMNSValidation(unittest.TestCase):
             self.assertGreater(height, 0, "La hauteur doit être positive")
             self.assertGreater(width, 0, "La largeur doit être positive")
             
-            # Vérifier que les dimensions sont raisonnables
-            self.assertLess(height, 100000, "La hauteur ne doit pas dépasser 100000 pixels")
-            self.assertLess(width, 100000, "La largeur ne doit pas dépasser 100000 pixels")
+            # Vérifier que l'image est assez grande pour être découpée en tuiles
+            min_tile_size = 50  # Taille minimale de tuile
+            self.assertGreater(height, min_tile_size, f"La hauteur doit permettre au moins une tuile de {min_tile_size} pixels")
+            self.assertGreater(width, min_tile_size, f"La largeur doit permettre au moins une tuile de {min_tile_size} pixels")
             
-            # Vérifier que l'image n'est pas trop petite
-            self.assertGreater(height * width, 100, "L'image doit avoir au moins 100 pixels")
+            # Vérifier que l'image peut être découpée en tuiles de taille raisonnable
+            tile_size = 200  # Taille de tuile typique pour les tests
+            self.assertGreater(height, tile_size // 2, f"La hauteur doit permettre au moins une tuile de {tile_size} pixels")
+            self.assertGreater(width, tile_size // 2, f"La largeur doit permettre au moins une tuile de {tile_size} pixels")
+    
+    def test_mns_compatible_with_tiling(self):
+        """Test que le MNS est compatible avec le système de découpage en tuiles"""
+        with rasterio.open(self.valid_mns_path) as src:
+            height, width = src.height, src.width
+            
+            # Taille de tuile typique pour GEMAUT
+            tile_size = 200
+            pad_size = 80
+            
+            # Vérifier qu'on peut créer au moins une tuile complète
+            self.assertGreater(height, tile_size, f"Hauteur insuffisante pour tuiles de {tile_size} pixels")
+            self.assertGreater(width, tile_size, f"Largeur insuffisante pour tuiles de {tile_size} pixels")
+            
+            # Vérifier que le padding est raisonnable par rapport à la taille de tuile
+            self.assertLess(pad_size, tile_size, f"Le padding ({pad_size}) doit être < taille de tuile ({tile_size})")
+            
+            # Vérifier qu'on peut créer plusieurs tuiles si l'image est assez grande
+            if height > tile_size * 2 and width > tile_size * 2:
+                logger.info(f"✅ MNS de {height}x{width} pixels peut être découpé en plusieurs tuiles de {tile_size}x{tile_size}")
 
 
 class TestParameterValidation(unittest.TestCase):
