@@ -211,7 +211,7 @@ main() {
 
     log_info "Veuillez exécuter la commande suivante pour recharger l'environnement :"
     echo ""
-    echo "    conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
+    echo "    ${RED}conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
     echo ""
     
     # Message spécial pour les vieux systèmes
