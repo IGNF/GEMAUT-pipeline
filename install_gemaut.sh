@@ -220,7 +220,13 @@ main() {
     echo ""
     echo "    export LD_LIBRARY_PATH=/usr/lib64:\$CONDA_PREFIX/lib:\$HOME/GEMAUT/saga_install/lib64:\$LD_LIBRARY_PATH"
     echo ""
-    
+   
+    log_info "Pour vérifier que tout s'est bien passé, tapez:"
+    echo ""
+    echo -e "${GREEN}python3 -m unittest discover tests/ -v"
+    echo ""
+
+
     log_info "Pour utiliser GEMAUT, tapez:"
     echo ""
     echo "    script_gemaut --help"
