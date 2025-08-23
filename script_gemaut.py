@@ -50,6 +50,9 @@ class GEMAUTPipeline:
             logger.info(config.INFO_MESSAGES['start'].format(start_time=start_time_str))
             logger.info(f"Configuration: {self.config.to_dict()}")
             
+            # Étape 0: Vérification de la compatibilité MNS/Masque
+            self._validate_input_compatibility()
+            
             # Étape 1: Remplissage des trous dans MNS
             self._fill_holes_in_mns()
             
@@ -96,6 +99,40 @@ class GEMAUTPipeline:
             logger.error(config.ERROR_MESSAGES['general'].format(error=e))
             raise
     
+    def _validate_input_compatibility(self):
+        """Vérifie la compatibilité entre le MNS et le masque"""
+        if self.config.mask_file is None:
+            logger.info("Aucun fichier masque fourni, la vérification sera effectuée après calcul du masque")
+            return
+        
+        logger.info("Vérification de la compatibilité MNS/Masque...")
+        
+        try:
+            compatible, details = image_utils.RasterProcessor.validate_raster_compatibility(
+                self.config.mns_input, 
+                self.config.mask_file
+            )
+            
+            if not compatible:
+                logger.error("❌ INCOMPATIBILITÉ DÉTECTÉE entre le MNS et le masque!")
+                logger.error("Problèmes identifiés:")
+                for issue in details['issues']:
+                    logger.error(f"  - {issue}")
+                
+                logger.error("Informations détaillées:")
+                logger.error(f"  MNS: {details['mns_info']['width']}x{details['mns_info']['height']}, CRS: {details['mns_info']['crs']}")
+                logger.error(f"  Masque: {details['mask_info']['width']}x{details['mask_info']['height']}, CRS: {details['mask_info']['crs']}")
+                
+                raise ValueError("Le MNS et le masque ne sont pas compatibles. Vérifiez les dimensions et le CRS.")
+            else:
+                logger.info("✅ Compatibilité MNS/Masque validée")
+                logger.info(f"  Dimensions: {details['mns_info']['width']}x{details['mns_info']['height']}")
+                logger.info(f"  CRS: {details['mns_info']['crs']}")
+                
+        except Exception as e:
+            logger.error(f"Erreur lors de la vérification de compatibilité: {e}")
+            raise
+    
     def _fill_holes_in_mns(self):
         """Remplit les trous dans le MNS"""
         logger.info(config.INFO_MESSAGES['holes_filling'])
@@ -134,6 +171,20 @@ class GEMAUTPipeline:
                 self.config.get_saga_params()
             )
             self.config.mask_file = output_mask_file
+            
+            # Vérifier la compatibilité après calcul du masque
+            logger.info("Vérification de la compatibilité après calcul du masque...")
+            compatible, details = image_utils.RasterProcessor.validate_raster_compatibility(
+                self.config.mns_input, 
+                self.config.mask_file
+            )
+            if not compatible:
+                logger.error("❌ INCOMPATIBILITÉ DÉTECTÉE après calcul du masque!")
+                for issue in details['issues']:
+                    logger.error(f"  - {issue}")
+                raise ValueError("Le masque calculé n'est pas compatible avec le MNS")
+            else:
+                logger.info("✅ Compatibilité validée après calcul du masque")
         else:
             logger.info(f"Utilisation du masque fourni: {self.config.mask_file}")
     

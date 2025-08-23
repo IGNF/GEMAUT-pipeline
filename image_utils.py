@@ -49,6 +49,59 @@ class RasterProcessor:
             raise
     
     @staticmethod
+    def validate_raster_compatibility(mns_path: str, mask_path: str) -> Tuple[bool, dict]:
+        """
+        Vérifie la compatibilité entre le MNS et le masque
+        
+        Args:
+            mns_path: Chemin vers le fichier MNS
+            mask_path: Chemin vers le fichier masque
+            
+        Returns:
+            Tuple[bool, dict]: (compatible, détails des différences)
+        """
+        try:
+            # Obtenir les informations des deux fichiers
+            mns_info = RasterProcessor.get_image_info(mns_path)
+            mask_info = RasterProcessor.get_image_info(mask_path)
+            
+            # Vérifications
+            issues = []
+            
+            # Vérification des dimensions
+            if mns_info['height'] != mask_info['height']:
+                issues.append(f"Hauteur différente: MNS={mns_info['height']}, Masque={mask_info['height']}")
+            
+            if mns_info['width'] != mask_info['width']:
+                issues.append(f"Largeur différente: MNS={mns_info['width']}, Masque={mask_info['width']}")
+            
+            # Vérification du CRS
+            if mns_info['crs'] != mask_info['crs']:
+                issues.append(f"CRS différent: MNS={mns_info['crs']}, Masque={mask_info['crs']}")
+            
+            # Vérification de la transformation géographique
+            if mns_info['transform'] != mask_info['transform']:
+                issues.append(f"Transformation géographique différente")
+            
+            # Vérification des bornes
+            if mns_info['bounds'] != mask_info['bounds']:
+                issues.append(f"Bornes géographiques différentes")
+            
+            # Résumé des informations
+            summary = {
+                'mns_info': mns_info,
+                'mask_info': mask_info,
+                'issues': issues,
+                'compatible': len(issues) == 0
+            }
+            
+            return len(issues) == 0, summary
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la validation de compatibilité: {e}")
+            return False, {'error': str(e), 'compatible': False}
+    
+    @staticmethod
     def contains_valid_data(file_path: str, no_data_value: float = -9999) -> bool:
         """Vérifie si une image contient des données valides"""
         try:
