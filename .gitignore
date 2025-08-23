@@ -149,4 +149,20 @@ tests/work/
 # Fichiers de travail temporaires
 tmp/
 work/
-temp/ 
+temp/
+
+# Fichiers de configuration de test
+config_ground_mask_csf*.ini
+config_test_*.yaml
+
+# Répertoires de test temporaires
+test_env/
+RepTra_tmp_*/
+
+# Fichiers de données de test
+tests/*.tif
+tests/*.tif.aux.xml
+tests/log_*.txt
+
+# Scripts d'installation temporaires
+install_pdal_test.sh 

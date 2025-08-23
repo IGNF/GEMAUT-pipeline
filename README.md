@@ -86,3 +86,80 @@ Le MNS d'entrée doit avoir des valeurs de no_data différentes pour :
 - `--pad` : Recouvrement entre tuiles (défaut: 120)
 - `--norme` : Choix de la norme (défaut: hubertukey)
 - `--clean` : Supprimer les fichiers temporaires
+
+# 🧪 Environnement de Test PDAL
+
+Cet environnement permet de tester **PDAL** (Point Data Abstraction Library) en isolation, en comparaison avec **SAGA**, avant d'entreprendre la migration dans le pipeline GEMAUT.
+
+## 📁 Structure
+
+```
+test_pdal/
+├── data/                    # Données de test (MNS_IN.tif)
+├── scripts/                 # Scripts de test
+│   ├── test_pdal_basic.py      # Tests de base PDAL
+│   ├── test_pdal_morphology.py # Tests des opérations morphologiques
+│   └── benchmark_pdal_vs_saga.py # Comparaison performance
+├── output/                  # Résultats des tests
+│   ├── pdal_results/        # Sorties PDAL
+│   └── saga_results/        # Sorties SAGA
+└── README.md               # Ce fichier
+```
+
+## 🚀 Installation
+
+### 1. Créer l'environnement conda
+```bash
+conda create -n pdal_test python=3.11
+conda activate pdal_test
+```
+
+### 2. Installer PDAL
+```bash
+conda install -c conda-forge pdal pdal-python
+```
+
+### 3. Vérifier l'installation
+```bash
+python3 -c "import pdal; print(pdal.__version__)"
+```
+
+### 4. Préparer les données de test
+```bash
+# Copier votre fichier MNS de test
+cp /path/to/your/MNS_IN.tif data/
+```
+
+## 🧪 Exécution des tests
+
+### Test de base PDAL
+```bash
+python3 scripts/test_pdal_basic.py
+```
+
+### Test des opérations morphologiques
+```bash
+python3 scripts/test_pdal_morphology.py
+```
+
+### Benchmark PDAL vs SAGA
+```bash
+python3 scripts/benchmark_pdal_vs_saga.py
+```
+
+## 🎯 Objectifs
+
+- **Tester PDAL** en isolation
+- **Comparer les performances** avec SAGA
+- **Valider la compatibilité** des résultats
+- **Prendre une décision** sur la migration
+
+## 📚 Ressources
+
+- [Site officiel PDAL](https://pdal.io/)
+- [Documentation Python](https://pdal.io/python.html)
+- [Filtres morphologiques](https://pdal.io/stages/filters.morphology.html)
+
+---
+
+**Cet environnement vous permettra de faire un choix éclairé sur la migration vers PDAL !** 🎯
