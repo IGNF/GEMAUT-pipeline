@@ -11,9 +11,9 @@
 
 - **🔄 Calcul automatique de masques** avec `--auto-mask`
 - **🎯 Choix de méthode** : SAGA ou PDAL avec `--mask-method`
-- **⚡ Intégration native** de PDAL (Point Data Abstraction Library)
+- **⚡ Support intégré** de PDAL (Point Data Abstraction Library)
+- **🤖 Sélection automatique** de la meilleure méthode disponible
 - **🛡️ Fallback automatique** vers SAGA si PDAL échoue
-- **📊 Comparaison des méthodes** SAGA vs PDAL
 
 ---
 
@@ -153,7 +153,8 @@ python3 script_gemaut.py \
 
 ### **Sélection automatique** 🤖
 - **Utilisation** : `--mask-method auto`
-- **Logique** : Teste PDAL en premier, fallback vers SAGA si échec
+- **Logique** : Priorité à SAGA (plus mature), fallback vers PDAL si SAGA indisponible
+- **Note** : Cette sélection est basée sur la disponibilité des outils, pas sur une comparaison des résultats
 
 ---
 
