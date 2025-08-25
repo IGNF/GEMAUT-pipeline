@@ -9,7 +9,7 @@
 
 ## ✨ Nouvelles fonctionnalités
 
-- **🔄 Calcul automatique de masques** avec `--auto-mask`
+- **⚙️ Calcul automatique de masques** avec `--auto-mask`
 - **🎯 Choix de méthode** : SAGA ou PDAL avec `--mask-method`
 - **⚡ Support intégré** de PDAL (Point Data Abstraction Library)
 - **🤖 Sélection automatique** de la meilleure méthode disponible
