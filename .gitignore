@@ -166,3 +166,9 @@ tests/log_*.txt
 
 # Scripts d'installation temporaires
 install_pdal_test.sh 
+
+# Ignorer le dossier YAML
+YAML/
+
+# Ignorer tous les dossiers qui commencent par RepTra
+RepTra*/

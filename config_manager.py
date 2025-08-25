@@ -172,14 +172,12 @@ class ConfigManager:
             'pdal': {
                 'csf': {
                     'max_iterations': 500,
-                    'class_threshold': 0.6,
-                    'cell_size': 1.0,
-                    'time_step': 0.65,
-                    'rigidness': 4
-                },
-                'outlier': {
-                    'multiplier': 2.5,
-                    'max_neighbors': 50
+                    'class_threshold': 0.8,
+                    'cell_size': 2.0,
+                    'time_step': 0.8,
+                    'rigidness': 5,
+                    'hdiff': 0.2,
+                    'smooth': True
                 }
             }
         }

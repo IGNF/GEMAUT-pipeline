@@ -116,23 +116,15 @@ class GEMAUTConfig:
         }
     
     def get_pdal_params(self):
-        """Retourne les paramètres pour PDAL"""
+        """Retourne les paramètres PDAL pour le calcul de masque"""
         return {
-            'radius': self.radius_saga,  # Réutilise les paramètres SAGA pour la cohérence
-            'tile': self.radius_saga,
-            'no_data_max': self.nodata_max,
-            'pente': self.pente_saga,
-            
-            # Paramètres CSF spécifiques à PDAL
             'csf_max_iterations': config.PDAL_CSF_MAX_ITERATIONS,
             'csf_class_threshold': config.PDAL_CSF_CLASS_THRESHOLD,
             'csf_cell_size': config.PDAL_CSF_CELL_SIZE,
             'csf_time_step': config.PDAL_CSF_TIME_STEP,
             'csf_rigidness': config.PDAL_CSF_RIGIDNESS,
-            
-            # Paramètres des filtres de prétraitement
-            'outlier_multiplier': config.PDAL_OUTLIER_MULTIPLIER,
-            'outlier_max_neighbors': config.PDAL_OUTLIER_MAX_NEIGHBORS
+            'csf_hdiff': config.PDAL_CSF_HDIFF,
+            'csf_smooth': config.PDAL_CSF_SMOOTH
         }
     
     def create_directories(self):

@@ -31,12 +31,12 @@ DEFAULT_MASK_COMPUTATION = True  # Calcul automatique par défaut
 
 # Paramètres PDAL pour le calcul de masque
 PDAL_CSF_MAX_ITERATIONS = 500
-PDAL_CSF_CLASS_THRESHOLD = 0.6
-PDAL_CSF_CELL_SIZE = 1.0
-PDAL_CSF_TIME_STEP = 0.65
-PDAL_CSF_RIGIDNESS = 4
-PDAL_OUTLIER_MULTIPLIER = 2.5
-PDAL_OUTLIER_MAX_NEIGHBORS = 50
+PDAL_CSF_CLASS_THRESHOLD = 0.8      # Changer 0.6 → 0.8
+PDAL_CSF_CELL_SIZE = 2.0            # Changer 1.0 → 2.0
+PDAL_CSF_TIME_STEP = 0.8            # Changer 0.65 → 0.8
+PDAL_CSF_RIGIDNESS = 5              # Changer 4 → 5
+PDAL_CSF_HDIFF = 0.2                # Ajouter cette constante
+PDAL_CSF_SMOOTH = True              # Ajouter cette constante
 
 # Paramètres de traitement des trous
 DEFAULT_WEIGHT_TYPE = 1  # Distance Euclidienne

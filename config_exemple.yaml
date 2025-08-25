@@ -1,43 +1,39 @@
-# Configuration GEMAUT pour votre traitement
-# Correspond à: script_gemaut --mns /Volumes/DANI/data_nchampion/DATA_TEST_GEMO/IN/FusionPNEO_CROP_XS.tif --out /Volumes/ESPACE_TRAVAIL/DANI/data_nchampion/DATA_PNEO/DATA_MTPL/DATA_CURSOR/out_TEST.tif --reso 4 --cpu 8 --RepTra RepTraVerif --nodata_ext -32768 --nodata_int -32767 --groundval 0
-
-# Paramètres d'entrée/sortie
 input:
-  mns_file: "/Volumes/DANI/data_nchampion/DATA_TEST_GEMO/IN/FusionPNEO_CROP_XS.tif"
-  mask_file: null  # null pour calcul automatique avec SAGA
-  init_file: null  # null pour utiliser le MNS
-  output_file: "/Volumes/ESPACE_TRAVAIL/DANI/data_nchampion/DATA_PNEO/DATA_MTPL/DATA_CURSOR/out_TEST_YAML.tif"
-  work_dir: "RepTraVerif"
-
-# Paramètres de traitement
+  mns_file: /chemin/vers/MNS.tif
+  mask_file: null
+  init_file: null
+  output_file: /chemin/vers/MNT.tif
+  work_dir: /chemin/vers/RepTra
 processing:
   resolution: 4.0
   cpu_count: 8
   clean_temp: false
   verbose: false
-
-# Paramètres GEMO (valeurs par défaut)
 gemo:
   sigma: 0.5
   regul: 0.01
-  norme: "hubertukey"
-
-# Paramètres de tuilage (valeurs par défaut)
+  norme: hubertukey
 tiling:
   tile_size: 300
   pad_size: 120
-
-# Paramètres NoData (spécifiés dans votre commande)
 nodata:
   external: -32768
   internal: -32767
-
-# Paramètres masque (spécifié dans votre commande)
 mask:
   ground_value: 0
-
-# Paramètres SAGA (pour calcul automatique du masque)
 saga:
   radius: 100
   tile: 100
-  pente: 15 
+  pente: 15
+mask_computation:
+  auto_computation: true
+  method: pdal
+pdal:
+  csf:
+    max_iterations: 500
+    class_threshold: 0.8
+    cell_size: 2.0
+    time_step: 0.8
+    rigidness: 5
+    hdiff: 0.2
+    smooth: true
