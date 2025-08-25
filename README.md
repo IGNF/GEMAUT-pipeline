@@ -5,15 +5,12 @@
 
 # 🚀 GEMAUT - Génération de Modèles Automatiques de Terrain
 
-**L'outil avancé pour le passage MNS > MNT sous Linux & Conda avec support intégré PDAL et SAGA**
+**L'outil avancé pour le passage MNS > MNT Haute Résolution du Service de l'Imagerie Spatiale de l'IGN 🚀 **
 
 ## ✨ Nouvelles fonctionnalités
 
 - **⚙️ Calcul automatique de masques** avec `--auto-mask`
 - **🎯 Choix de méthode** : SAGA ou PDAL avec `--mask-method`
-- **⚡ Support intégré** de PDAL (Point Data Abstraction Library)
-- **🤖 Sélection automatique** de la meilleure méthode disponible
-- **🛡️ Fallback automatique** vers SAGA si PDAL échoue
 
 ---
 
@@ -39,7 +36,6 @@ chmod +x install_gemaut.sh
 # Lancer l'installation
 ./install_gemaut.sh
 ```
-
 ---
 
 ## 🎯 Utilisation
@@ -56,7 +52,7 @@ python3 script_gemaut.py --help
 
 ### 3. Exemples d'utilisation
 
-#### 🆕 **Calcul automatique de masque avec SAGA**
+#### **Calcul automatique de masque avec SAGA**
 ```bash
 python3 script_gemaut.py \
     --mns /chemin/vers/MNS_in.tif \
@@ -68,7 +64,7 @@ python3 script_gemaut.py \
     --mask-method saga
 ```
 
-#### 🆕 **Calcul automatique de masque avec PDAL**
+#### **Calcul automatique de masque avec PDAL**
 ```bash
 python3 script_gemaut.py \
     --mns /chemin/vers/MNS_in.tif \
@@ -80,19 +76,7 @@ python3 script_gemaut.py \
     --mask-method pdal
 ```
 
-#### 🆕 **Sélection automatique de la meilleure méthode**
-```bash
-python3 script_gemaut.py \
-    --mns /chemin/vers/MNS_in.tif \
-    --out /chemin/vers/MNT_AUTO.tif \
-    --reso 4 \
-    --cpu 24 \
-    --RepTra RepTra_AUTO \
-    --auto-mask \
-    --mask-method auto
-```
-
-#### 📋 **Utilisation traditionnelle avec masque fourni**
+#### **Utilisation traditionnelle avec un masque fourni par l'utilisateur**
 ```bash
 python3 script_gemaut.py \
     --mns /chemin/vers/MNS_in.tif \
@@ -103,6 +87,13 @@ python3 script_gemaut.py \
     --masque /chemin/vers/masque.tif \
     --nodata_ext -32768 \
     --nodata_int -32767
+```
+
+#### **Utilisation traditionnelle avec un masque fourni par l'utilisateur**
+```bash
+python3 script_gemaut.py \
+    --config config_exemple.yaml
+[Configuration](config_exemple.yaml)** : Exemples de configuration
 ```
 
 ---
@@ -116,9 +107,9 @@ python3 script_gemaut.py \
 - `--cpu` : Nombre de CPUs à utiliser
 - `--RepTra` : Répertoire de travail
 
-### 🆕 **Nouveaux paramètres de masque automatique**
+### **Nouveaux paramètres de masque automatique**
 - `--auto-mask` : Activer le calcul automatique de masque
-- `--mask-method` : Méthode de calcul (`saga`, `pdal`, ou `auto`)
+- `--mask-method` : Méthode de calcul (`saga`, `pdal`, ou `auto`=`saga` si disponible)
 
 ### Paramètres optionnels
 - `--masque` : Masque sol/sursol (ignoré si `--auto-mask` est activé)
@@ -135,29 +126,6 @@ python3 script_gemaut.py \
 
 ---
 
-## 🎯 Méthodes de calcul de masque
-
-### **SAGA GIS** 🌍
-- **Avantages** : Stable, éprouvé, bonnes performances
-- **Utilisation** : `--mask-method saga`
-- **Fichiers générés** : 
-  - `MASQUE_compute.tif` (masque calculé)
-  - `MASQUE_SAGA_CORRIGE_apres_correction.tif` (masque aligné géographiquement)
-
-### **PDAL (Point Data Abstraction Library)** 🚀
-- **Avantages** : Algorithmes avancés, optimisé pour les nuages de points
-- **Utilisation** : `--mask-method pdal`
-- **Fichiers générés** : 
-  - `MASQUE_compute.tif` (masque calculé)
-  - `pdal_pipeline_used.json` (pipeline PDAL utilisé)
-
-### **Sélection automatique** 🤖
-- **Utilisation** : `--mask-method auto`
-- **Logique** : Priorité à SAGA (plus mature), fallback vers PDAL si SAGA indisponible
-- **Note** : Cette sélection est basée sur la disponibilité des outils, pas sur une comparaison des résultats
-
----
-
 ## 📁 Structure des données
 
 ### MNS d'entrée
@@ -168,27 +136,34 @@ Le MNS d'entrée doit avoir des valeurs de no_data différentes pour :
 ### Masques générés
 - **Résolution** : Identique au MNS d'entrée
 - **Format** : Binaire (0 = sol, 1 = sursol)
-- **Alignement** : Automatiquement corrigé pour correspondre au MNS
-
 ---
 
-## 🔍 Configuration avancée
+## Configuration avancée
 
 ### Fichier de configuration YAML
 ```yaml
 # config_exemple_avec_masque_auto.yaml
-mask_computation:
-  auto_mask_computation: true
-  mask_method: "auto"  # "saga", "pdal", ou "auto"
 
+### Paramètres SAGA
+```yaml
+saga:
+  radius: 100.0        # Rayon de recherche
+  tile: 100            # Taille des dalles
+  pente: 15.0          # Pente maximale
+```
+
+### Paramètres PDAL
+```yaml
 pdal:
-  csf_max_iterations: 500
-  csf_cloth_resolution: 0.5
-  csf_class_threshold: 0.5
-  csf_rigidness: 1
-  csf_time_step: 0.65
-  csf_iterations: 500
-  csf_concave_hull: true
+
+'csf::iterations': 500 [Default: 500]
+'csf::threshold': 0.8 [Default: 0.5]
+'csf::resolution': 2.0 [Default: 1.0]
+'csf::step': 0.8 [Default: 0.65]
+'csf::rigidness': 5 [Default: 3]
+'csf::hdiff': 0.2 [Default: 0.3] 
+'csf::smooth': True [Default: true]
+
 ```
 
 ### Variables d'environnement
@@ -199,7 +174,7 @@ export GEMAUT_TEMP_DIR=/tmp/gemaut
 
 ---
 
-## 🧪 Tests et validation
+## Tests et validation
 
 ### Test de l'intégration
 ```bash
@@ -216,17 +191,12 @@ python3 demo_masque_auto.py
 python3 test_compatibility_check.py
 ```
 
----
-
 ## 📚 Documentation
-
-- **📖 [README Calcul Masque Auto](README_CALCUL_MASQUE_AUTO.md)** : Guide détaillé des nouvelles fonctionnalités
-- **🔧 [Configuration](config_exemple_avec_masque_auto.yaml)** : Exemples de configuration
 - **🧪 [Tests](tests/README_TESTS.md)** : Guide des tests et validation
 
 ---
 
-## 🆘 Dépannage
+## Dépannage
 
 ### Problèmes courants
 
@@ -247,15 +217,9 @@ saga_cmd --version
 # Réinstaller si nécessaire
 conda install -c conda-forge saga
 ```
-
-#### **Erreurs de compatibilité géographique**
-- Les masques SAGA peuvent avoir des différences géographiques mineures
-- Le pipeline corrige automatiquement ces différences
-- Vérifiez les logs pour plus de détails
-
 ---
 
-## 🤝 Contribution
+## Contribution
 
 1. Fork le projet
 2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
@@ -265,21 +229,8 @@ conda install -c conda-forge saga
 
 ---
 
-## 📄 Licence
+## Licence
 
 Ce projet est sous licence [LICENSE](LICENSE).
 
 ---
-
-## 🆕 **Changelog récent**
-
-### Version actuelle
-- ✅ **Intégration complète PDAL** pour le calcul de masques
-- ✅ **Calcul automatique de masques** avec `--auto-mask`
-- ✅ **Sélection de méthode** SAGA/PDAL/Auto
-- ✅ **Fallback automatique** vers SAGA si PDAL échoue
-- ✅ **Documentation complète** des nouvelles fonctionnalités
-
----
-
-**🎯 GEMAUT : Plus qu'un pipeline, une solution complète pour la génération de MNT !**

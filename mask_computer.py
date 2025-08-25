@@ -167,15 +167,13 @@ class MaskComputer:
                 'pente': 15.0,        # Pente de 15° (paramètre GEMAUT)
                 
                 # Paramètres CSF configurables pour améliorer la détection
-                'csf_max_iterations': 500,      # Plus d'itérations = meilleure précision
-                'csf_class_threshold': 0.6,     # Seuil plus strict (0.6 au lieu de 0.5)
-                'csf_cell_size': 1.0,          # Résolution de la grille
-                'csf_time_step': 0.65,         # Pas de temps stable
-                'csf_rigidness': 4,            # Rigidité plus élevée = plus strict
-                
-                # Paramètres des filtres de prétraitement
-                'outlier_multiplier': 2.5,      # Multiplicateur plus strict pour outlier
-                'outlier_max_neighbors': 50     # Plus de voisins pour l'analyse
+                'csf_max_iterations': config.PDAL_CSF_MAX_ITERATIONS,      # 500
+                'csf_class_threshold': config.PDAL_CSF_CLASS_THRESHOLD,    # 0.8
+                'csf_cell_size': config.PDAL_CSF_CELL_SIZE,               # 2.0
+                'csf_time_step': config.PDAL_CSF_TIME_STEP,               # 0.8
+                'csf_rigidness': config.PDAL_CSF_RIGIDNESS,               # 5
+                'csf_hdiff': config.PDAL_CSF_HDIFF,                       # 0.2
+                'csf_smooth': config.PDAL_CSF_SMOOTH,                     # True
             }
         else:
             raise ValueError(f"Méthode non supportée: {method}")
