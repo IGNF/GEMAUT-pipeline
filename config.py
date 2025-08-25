@@ -24,6 +24,20 @@ RADIUS_SAGA = 100
 TILE_SAGA = 100
 PENTE_SAGA = 15
 
+# Paramètres de calcul automatique de masque
+MASK_COMPUTATION_METHODS = ['auto', 'saga', 'pdal']
+DEFAULT_MASK_METHOD = 'auto'
+DEFAULT_MASK_COMPUTATION = True  # Calcul automatique par défaut
+
+# Paramètres PDAL pour le calcul de masque
+PDAL_CSF_MAX_ITERATIONS = 500
+PDAL_CSF_CLASS_THRESHOLD = 0.6
+PDAL_CSF_CELL_SIZE = 1.0
+PDAL_CSF_TIME_STEP = 0.65
+PDAL_CSF_RIGIDNESS = 4
+PDAL_OUTLIER_MULTIPLIER = 2.5
+PDAL_OUTLIER_MAX_NEIGHBORS = 50
+
 # Paramètres de traitement des trous
 DEFAULT_WEIGHT_TYPE = 1  # Distance Euclidienne
 DEFAULT_EDGE_SIZE = 5

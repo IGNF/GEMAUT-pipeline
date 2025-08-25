@@ -50,6 +50,10 @@ class GEMAUTConfigFromFile:
     saga_radius: int = 100
     saga_tile: int = 100
     saga_pente: int = 15
+    
+    # Paramètres de calcul automatique de masque
+    auto_mask_computation: bool = True
+    mask_method: str = 'auto'
 
 
 class ConfigManager:
@@ -70,6 +74,8 @@ class ConfigManager:
             nodata_data = config_data.get('nodata', {})
             mask_data = config_data.get('mask', {})
             saga_data = config_data.get('saga', {})
+            mask_computation_data = config_data.get('mask_computation', {})
+            pdal_data = config_data.get('pdal', {})
             
             return GEMAUTConfigFromFile(
                 # Paramètres d'entrée/sortie
@@ -104,7 +110,11 @@ class ConfigManager:
                 # Paramètres SAGA
                 saga_radius=saga_data.get('radius', 100),
                 saga_tile=saga_data.get('tile', 100),
-                saga_pente=saga_data.get('pente', 15)
+                saga_pente=saga_data.get('pente', 15),
+                
+                # Paramètres de calcul automatique de masque
+                auto_mask_computation=mask_computation_data.get('auto_computation', True),
+                mask_method=mask_computation_data.get('method', 'auto')
             )
             
         except FileNotFoundError:
@@ -154,6 +164,23 @@ class ConfigManager:
                 'radius': 100,
                 'tile': 100,
                 'pente': 15
+            },
+            'mask_computation': {
+                'auto_computation': True,
+                'method': 'auto'
+            },
+            'pdal': {
+                'csf': {
+                    'max_iterations': 500,
+                    'class_threshold': 0.6,
+                    'cell_size': 1.0,
+                    'time_step': 0.65,
+                    'rigidness': 4
+                },
+                'outlier': {
+                    'multiplier': 2.5,
+                    'max_neighbors': 50
+                }
             }
         }
         
@@ -227,6 +254,8 @@ class ConfigManager:
             mask_file=config.mask_file,
             ground_value=config.ground_value,
             init_file=config.init_file,
+            auto_mask_computation=getattr(config, 'auto_mask_computation', True),
+            mask_method=getattr(config, 'mask_method', 'auto'),
             nodata_ext=config.nodata_ext,
             nodata_int=config.nodata_int,
             sigma=config.sigma,

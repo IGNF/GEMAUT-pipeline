@@ -42,6 +42,10 @@ class GEMAUTConfig:
     tile_saga: int = config.TILE_SAGA
     pente_saga: int = config.PENTE_SAGA
     
+    # Paramètres de calcul automatique de masque
+    auto_mask_computation: bool = config.DEFAULT_MASK_COMPUTATION
+    mask_method: str = config.DEFAULT_MASK_METHOD
+    
     # Paramètres internes
     nodata_interne_mask: int = config.NODATA_INTERNE_MASK
     nodata_max: int = config.NODATA_MAX
@@ -109,6 +113,26 @@ class GEMAUTConfig:
             'tile': self.tile_saga,
             'no_data_max': self.nodata_max,
             'pente': self.pente_saga
+        }
+    
+    def get_pdal_params(self):
+        """Retourne les paramètres pour PDAL"""
+        return {
+            'radius': self.radius_saga,  # Réutilise les paramètres SAGA pour la cohérence
+            'tile': self.radius_saga,
+            'no_data_max': self.nodata_max,
+            'pente': self.pente_saga,
+            
+            # Paramètres CSF spécifiques à PDAL
+            'csf_max_iterations': config.PDAL_CSF_MAX_ITERATIONS,
+            'csf_class_threshold': config.PDAL_CSF_CLASS_THRESHOLD,
+            'csf_cell_size': config.PDAL_CSF_CELL_SIZE,
+            'csf_time_step': config.PDAL_CSF_TIME_STEP,
+            'csf_rigidness': config.PDAL_CSF_RIGIDNESS,
+            
+            # Paramètres des filtres de prétraitement
+            'outlier_multiplier': config.PDAL_OUTLIER_MULTIPLIER,
+            'outlier_max_neighbors': config.PDAL_OUTLIER_MAX_NEIGHBORS
         }
     
     def create_directories(self):

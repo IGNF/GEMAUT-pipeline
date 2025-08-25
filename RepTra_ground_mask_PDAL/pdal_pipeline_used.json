@@ -1,0 +1,54 @@
+{
+  "pipeline": [
+    {
+      "type": "readers.gdal",
+      "filename": "/home/NChampion/DATADRIVE1/DEVELOPPEMENT/test_integration/GEMAUT-pipeline/RepTra_ground_mask_PDAL/tmp/MNS4SAGA_nodata_max.tif",
+      "header": "Z"
+    },
+    {
+      "type": "filters.ferry",
+      "dimensions": "=>Classification"
+    },
+    {
+      "type": "filters.elm"
+    },
+    {
+      "type": "filters.range",
+      "limits": "Classification![7:7]"
+    },
+    {
+      "type": "filters.range",
+      "limits": "Z[-32768:]"
+    },
+    {
+      "type": "filters.assign",
+      "assignment": "Classification[:]=0"
+    },
+    {
+      "type": "filters.csf",
+      "resolution": 2.0,
+      "threshold": 0.8,
+      "hdiff": 0.2,
+      "step": 0.8,
+      "rigidness": 5,
+      "iterations": 500,
+      "smooth": true
+    },
+    {
+      "type": "filters.assign",
+      "assignment": "Classification[2:2]=0"
+    },
+    {
+      "type": "filters.assign",
+      "assignment": "Classification[1:1]=1"
+    },
+    {
+      "type": "writers.gdal",
+      "filename": "/home/NChampion/DATADRIVE1/DEVELOPPEMENT/test_integration/GEMAUT-pipeline/RepTra_ground_mask_PDAL/MASQUE_compute.tif",
+      "resolution": "1",
+      "dimension": "Classification",
+      "output_type": "min",
+      "data_type": "uint8"
+    }
+  ]
+}
