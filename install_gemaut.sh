@@ -27,8 +27,8 @@ PARALLEL_JOBS=$(nproc)
 #            exit 1
 #        fi
 #    done
-#}
-###
+#}wq
+
 check_dependencies() {
     local deps=("git" "cmake" "make")
     for dep in "${deps[@]}"; do
