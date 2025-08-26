@@ -8,19 +8,20 @@ unset PROJ_LIB
 # Nettoyage PATH
 export PATH=${PATH//"$HOME\/GEMAUT\/saga_install\/bin:"/}
 export PATH=${PATH//"$HOME\/GEMAUT\/GEMO\/bin:"/}
+export PATH=${PATH//"$HOME\/GEMAUT:"/}
 
 # Nettoyage LD_LIBRARY_PATH
-if [ -d "\$HOME/GEMAUT/saga_install/lib64" ]; then
-    SAGA_LIB_DIR="\$HOME/GEMAUT/saga_install/lib64"
-elif [ -d "\$HOME/GEMAUT/saga_install/lib" ]; then
-    SAGA_LIB_DIR="\$HOME/GEMAUT/saga_install/lib"
+if [ -d "$HOME/GEMAUT/saga_install/lib64" ]; then
+    SAGA_LIB_DIR="$HOME/GEMAUT/saga_install/lib64"
+elif [ -d "$HOME/GEMAUT/saga_install/lib" ]; then
+    SAGA_LIB_DIR="$HOME/GEMAUT/saga_install/lib"
 fi
 
 # Nettoyage de LD_LIBRARY_PATH
-if [ -n "\$SAGA_LIB_DIR" ]; then
-    export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH//\$SAGA_LIB_DIR:/}
-    export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH//:\$SAGA_LIB_DIR/}
-    export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH//\$SAGA_LIB_DIR/}
+if [ -n "$SAGA_LIB_DIR" ]; then
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//$SAGA_LIB_DIR:/}
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//:$SAGA_LIB_DIR/}
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//$SAGA_LIB_DIR/}
 fi
 
 #############
