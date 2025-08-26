@@ -176,3 +176,15 @@ RepTra*/
 # QIS
 *.aux.xml
 *.qgz
+
+# Fichiers auxiliaires
+*.aux.xml
+
+# Dossiers de test temporaires
+test_env/
+RepTra_*/
+YAML/
+
+# Fichiers de configuration de test
+config_ground_mask_csf*.ini
+install_pdal_test.sh
