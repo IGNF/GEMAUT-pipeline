@@ -13,7 +13,7 @@
 - **🎯 Choix de méthode** : SAGA ou PDAL avec `--mask-method`
 - **📋 Configuration simplifiée** : Utilisation d'un fichier de configuration YAML
 - **🧪 Tests unitaires complets** : Suite de tests automatisés pour validation
-- **🚀 Interface utilisateur améliorée** : Commande `gemaut` pour une utilisation simplifiée
+- **🚀 Interface utilisateur** : Commande `gemaut` pour une utilisation optimisée
 
 ---
 
