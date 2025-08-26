@@ -139,10 +139,6 @@ Le MNS d'entrée doit avoir des valeurs de no_data différentes pour :
 
 ## Configuration avancée
 
-### Fichier de configuration YAML
-```yaml
-# config_exemple_avec_masque_auto.yaml
-
 ### Paramètres SAGA
 ```yaml
 saga:
@@ -154,7 +150,6 @@ saga:
 ### Paramètres PDAL
 ```yaml
 pdal:
-
 'csf::iterations': 500 [Default: 500]
 'csf::threshold': 0.8 [Default: 0.5]
 'csf::resolution': 2.0 [Default: 1.0]
@@ -162,60 +157,8 @@ pdal:
 'csf::rigidness': 5 [Default: 3]
 'csf::hdiff': 0.2 [Default: 0.3] 
 'csf::smooth': True [Default: true]
-
 ```
 
-### Variables d'environnement
-```bash
-export GEMAUT_LOG_LEVEL=INFO
-export GEMAUT_TEMP_DIR=/tmp/gemaut
-```
-
----
-
-## Tests et validation
-
-### Test de l'intégration
-```bash
-python3 test_mask_integration.py
-```
-
-### Démonstration des fonctionnalités
-```bash
-python3 demo_masque_auto.py
-```
-
-### Vérification de compatibilité
-```bash
-python3 test_compatibility_check.py
-```
-
-## 📚 Documentation
-- **🧪 [Tests](tests/README_TESTS.md)** : Guide des tests et validation
-
----
-
-## Dépannage
-
-### Problèmes courants
-
-#### **PDAL non disponible**
-```bash
-# Vérifier l'installation
-conda list pdal
-
-# Réinstaller si nécessaire
-conda install -c conda-forge pdal pdal-python
-```
-
-#### **SAGA non disponible**
-```bash
-# Vérifier l'installation
-saga_cmd --version
-
-# Réinstaller si nécessaire
-conda install -c conda-forge saga
-```
 ---
 
 ## Contribution
