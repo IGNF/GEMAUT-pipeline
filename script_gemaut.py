@@ -164,10 +164,12 @@ class GEMAUTPipeline:
         if self.config.mask_file is None:
             if self.config.auto_mask_computation:
                 logger.info("Calcul automatique du masque sol/sursol...")
+                logger.info(f"🔍 Méthode demandée: {self.config.mask_method}")
                 output_mask_file = os.path.join(self.config.work_dir, 'MASQUE_compute.tif')
                 
                 # Importer le module de calcul de masque
                 try:
+                    logger.info("📦 Import du module mask_computer...")
                     from mask_computer import MaskComputer
                     mask_computer = MaskComputer()
                     
@@ -183,13 +185,16 @@ class GEMAUTPipeline:
                     
                     # Obtenir les paramètres appropriés
                     if self.config.mask_method in ['auto', 'saga']:
+                        logger.info("🔧 Utilisation des paramètres SAGA")
                         params = self.config.get_saga_params()
                     elif self.config.mask_method == 'pdal':
+                        logger.info("🔧 Utilisation des paramètres PDAL")
                         params = self.config.get_pdal_params()
                     else:
                         raise ValueError(f"Méthode non supportée: {self.config.mask_method}")
                     
                     # Calculer le masque
+                    logger.info(f"🚀 Lancement du calcul avec la méthode: {self.config.mask_method}")
                     mask_file = mask_computer.compute_mask(
                         mns_file=self.config.temp_files['mns4saga'],
                         output_mask_file=output_mask_file,
@@ -215,14 +220,17 @@ class GEMAUTPipeline:
                     logger.info(f"✅ Masque calculé avec succès: {mask_file}")
                     
                 except ImportError as e:
-                    logger.warning(f"Module de calcul automatique non disponible: {e}")
-                    logger.info("Fallback vers la méthode SAGA traditionnelle...")
+                    logger.warning(f"❌ Module de calcul automatique non disponible: {e}")
+                    logger.info("🔧 Fallback vers la méthode SAGA traditionnelle...")
                     self._fallback_saga_mask_computation(output_mask_file)
                     self.config.mask_file = output_mask_file
                 
                 except Exception as e:
-                    logger.error(f"Erreur lors du calcul automatique du masque: {e}")
-                    logger.info("Fallback vers la méthode SAGA traditionnelle...")
+                    logger.error(f"❌ Erreur lors du calcul automatique du masque: {e}")
+                    logger.error(f"Type d'erreur: {type(e).__name__}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    logger.info("🔧 Fallback vers la méthode SAGA traditionnelle...")
                     self._fallback_saga_mask_computation(output_mask_file)
                     self.config.mask_file = output_mask_file
                 
