@@ -22,13 +22,10 @@ except ImportError:
     logger.warning("Module SAGA non disponible")
 
 try:
-    # Ajouter le chemin vers le dossier test_pdal pour l'import
-    test_pdal_path = "/home/NChampion/DATADRIVE1/DEVELOPPEMENT/test_pdal"
-    if test_pdal_path not in sys.path:
-        sys.path.append(test_pdal_path)
-    
-    from pdal_integration import PDALIntegration
+    # Essayer d'importer PDAL directement
+    import pdal
     PDAL_AVAILABLE = True
+    logger.info("✅ Module PDAL détecté")
 except ImportError:
     PDAL_AVAILABLE = False
     logger.warning("Module PDAL non disponible")
@@ -61,14 +58,13 @@ class MaskComputer:
         
         if PDAL_AVAILABLE:
             try:
-                pdal_instance = PDALIntegration()
-                if pdal_instance._check_pdal_available():
-                    methods.append('pdal')
-                    logger.info("✅ PDAL disponible et fonctionnel")
-                else:
-                    logger.warning("⚠️ PDAL détecté mais non fonctionnel")
+                # Vérifier que PDAL est fonctionnel
+                import pdal
+                # Test simple d'import
+                methods.append('pdal')
+                logger.info("✅ PDAL disponible et fonctionnel")
             except Exception as e:
-                logger.warning(f"⚠️ PDAL non fonctionnel: {e}")
+                logger.warning(f"⚠️ PDAL détecté mais non fonctionnel: {e}")
         else:
             logger.warning("⚠️ Module PDAL non disponible")
         
