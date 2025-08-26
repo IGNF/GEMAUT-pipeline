@@ -26,8 +26,8 @@ export PROJ_LIB=$CONDA_PREFIX/share/proj
 export PATH=$SAGA_INSTALL_DIR/bin:$GEMAUT_INSTALL_DIR/bin:$PATH
 
 # Créer les liens symboliques une seule fois si besoin
-if [ ! -f "$CONDA_PREFIX/bin/script_gemaut" ]; then
-    ln -sf $HOME/GEMAUT/script_gemaut $CONDA_PREFIX/bin/script_gemaut
+if [ ! -f "$CONDA_PREFIX/bin/gemaut" ]; then
+    ln -sf $HOME/GEMAUT/script_gemaut $CONDA_PREFIX/bin/gemaut
 fi
 
 if [ ! -f "$CONDA_PREFIX/bin/saga_cmd" ]; then

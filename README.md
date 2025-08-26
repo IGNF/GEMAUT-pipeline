@@ -47,14 +47,14 @@ conda activate gemaut_env
 
 ### 2. Aide du script
 ```bash
-python3 script_gemaut.py --help
+gemaut --help
 ```
 
 ### 3. Exemples d'utilisation
 
 #### **Calcul automatique de masque avec SAGA**
 ```bash
-python3 script_gemaut.py \
+gemaut \
     --mns /chemin/vers/MNS_in.tif \
     --out /chemin/vers/MNT_SAGA.tif \
     --reso 4 \
@@ -66,7 +66,7 @@ python3 script_gemaut.py \
 
 #### **Calcul automatique de masque avec PDAL**
 ```bash
-python3 script_gemaut.py \
+gemaut \
     --mns /chemin/vers/MNS_in.tif \
     --out /chemin/vers/MNT_PDAL.tif \
     --reso 4 \
@@ -78,7 +78,7 @@ python3 script_gemaut.py \
 
 #### **Utilisation traditionnelle avec un masque fourni par l'utilisateur**
 ```bash
-python3 script_gemaut.py \
+gemaut \
     --mns /chemin/vers/MNS_in.tif \
     --out /chemin/vers/MNT.tif \
     --reso 4 \
@@ -89,11 +89,10 @@ python3 script_gemaut.py \
     --nodata_int -32767
 ```
 
-#### **Utilisation traditionnelle avec un masque fourni par l'utilisateur**
+#### **Utilisation avec fichier de configuration**
 ```bash
-python3 script_gemaut.py \
-    --config config_exemple.yaml
-[Configuration](config_exemple.yaml)** : Exemples de configuration
+gemaut \
+    --config ./examples/configs/config_exemple.yaml
 ```
 
 ---

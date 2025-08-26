@@ -28,7 +28,7 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//"$HOME\/GEMAUT\/saga_install\/lib:"/}
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//":$HOME\/GEMAUT\/saga_install\/lib"/}
 
 # Suppression des liens symboliques si présents
-rm -f "$CONDA_PREFIX/bin/script_gemaut"
+rm -f "$CONDA_PREFIX/bin/gemaut"
 rm -f "$CONDA_PREFIX/bin/saga_cmd"
 
 echo "GEMAUT and SAGA environment deactivated."
