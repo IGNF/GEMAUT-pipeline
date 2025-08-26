@@ -160,7 +160,6 @@ test_env/
 RepTra_tmp_*/
 
 # Fichiers de données de test
-tests/*.tif
 tests/*.tif.aux.xml
 tests/log_*.txt
 
