@@ -5,7 +5,7 @@
 
 # 🚀 GEMAUT - Génération de Modèles Automatiques de Terrain
 
-**L'outil avancé pour le passage MNS > MNT Haute Résolution du Service de l'Imagerie Spatiale de l'IGN 🚀 **
+**L'outil Open Source pour le passage MNS > MNT Haute Résolution développé au Service de l'Imagerie Spatiale de l'IGN 🚀 **
 
 ## ✨ Nouvelles fonctionnalités
 
