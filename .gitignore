@@ -172,3 +172,7 @@ YAML/
 
 # Ignorer tous les dossiers qui commencent par RepTra
 RepTra*/
+
+# QIS
+*.aux.xml
+*.qgz
