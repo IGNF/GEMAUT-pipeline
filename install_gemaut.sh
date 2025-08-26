@@ -19,14 +19,34 @@ GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
 PARALLEL_JOBS=$(nproc)
 
 # Vérification des dépendances
+#check_dependencies() {
+#    local deps=("git" "cmake" "make" "g++")
+#    for dep in "${deps[@]}"; do
+#        if ! command -v "$dep" &> /dev/null; then
+#            log_error "$dep n'est pas installé"
+#            exit 1
+#        fi
+#    done
+#}
+###
 check_dependencies() {
-    local deps=("git" "cmake" "make" "g++")
+    local deps=("git" "cmake" "make")
     for dep in "${deps[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             log_error "$dep n'est pas installé"
             exit 1
         fi
     done
+
+    # Vérification du compilateur C++
+    if command -v g++ &> /dev/null; then
+        log_info "g++ trouvé"
+    elif command -v x86_64-conda-linux-gnu-g++ &> /dev/null; then
+        log_info "compilateur conda trouvé (x86_64-conda-linux-gnu-g++)"
+    else
+        log_error "Aucun compilateur C++ trouvé"
+        exit 1
+    fi
 }
 
 # Vérification de l'environnement conda
