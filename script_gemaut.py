@@ -403,23 +403,23 @@ def parse_arguments():
         epilog="""EXEMPLES D'UTILISATION:
 
 1. Avec fichier de configuration YAML (recommandé):
-   python script_gemaut.py --config config.yaml
+   gemaut --config config.yaml
 
 2. Avec arguments de ligne de commande:
-   python script_gemaut.py --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--auto-mask] [--mask-method saga|pdal|auto] [--clean]
+   gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--auto-mask] [--mask-method saga|pdal|auto] [--clean]
 
 3. Créer un template de configuration:
-   python script_gemaut.py --create-config config.yaml
+   gemaut --create-config config.yaml
 
 4. Calcul automatique de masque:
    # Avec SAGA (méthode traditionnelle)
-   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga
    
    # Avec PDAL (plus rapide, algorithme CSF)
-   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal
    
    # Choix automatique (recommandé)
-   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method auto
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method auto
 
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
     """,
@@ -490,7 +490,7 @@ def main():
             from config_manager import ConfigManager
             ConfigManager.create_template(args.create_config)
             print(f"Template de configuration créé: {args.create_config}")
-            print("Modifiez ce fichier selon vos besoins, puis utilisez --config pour l'exécuter.")
+            print("Modifiez ce fichier selon vos besoins, puis utilisez 'gemaut --config' pour l'exécuter.")
             return
         
         if args.config:

@@ -158,8 +158,8 @@ setup_conda_env() {
     
     # Créer le lien symbolique
     mkdir -p "$HOME/GEMAUT"
-    ln -sf "$CURRENT_DIR/script_gemaut.py" "$HOME/GEMAUT/script_gemaut"
-    chmod +x "$HOME/GEMAUT/script_gemaut"
+    ln -sf "$CURRENT_DIR/script_gemaut.py" "$HOME/GEMAUT/gemaut"
+    chmod +x "$HOME/GEMAUT/gemaut"
 }
 
 # Nettoyage
@@ -176,7 +176,7 @@ create_uninstall_script() {
 #!/bin/bash
 rm -rf "$SAGA_INSTALL_DIR"
 rm -rf "$GEMAUT_INSTALL_DIR"
-rm -f "$HOME/GEMAUT/script_gemaut"
+    rm -f "$HOME/GEMAUT/gemaut"
 rm -f "$CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh"
 rm -f "$CONDA_PREFIX/etc/conda/deactivate.d/deactivate_gemaut.sh"
 EOF
@@ -211,14 +211,9 @@ main() {
 
     log_info "Veuillez exécuter la commande suivante pour recharger l'environnement :"
     echo ""
-    echo "    ${RED}conda deactivate && conda activate $(basename "$CONDA_PREFIX")"
+    echo -e "${GREEN}    conda deactivate && conda activate $(basename "$CONDA_PREFIX")${NC}"
     echo ""
-    
-    # Message spécial pour les vieux systèmes
-    echo -e "${YELLOW}Note for old systems (e.g. CentOS 7):${NC}"
-    echo -e "${YELLOW}You might need to set up the library path by running:${NC}"
-    echo ""
-    echo "    export LD_LIBRARY_PATH=/usr/lib64:\$CONDA_PREFIX/lib:\$HOME/GEMAUT/saga_install/lib64:\$LD_LIBRARY_PATH"
+    log_info "Cette commande est ESSENTIELLE pour que GEMAUT fonctionne correctement !"
     echo ""
    
     log_info "Pour vérifier que tout s'est bien passé, tapez:"
@@ -229,7 +224,7 @@ main() {
 
     log_info "Pour utiliser GEMAUT, tapez:"
     echo ""
-    echo "    script_gemaut --help"
+    echo "    gemaut --help"
     echo ""
 }
 
