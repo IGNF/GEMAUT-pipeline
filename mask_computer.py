@@ -80,7 +80,7 @@ class MaskComputer:
         return methods
     
     def compute_mask(self, mns_file: str, output_mask_file: str, 
-                    work_dir: str, method: str = 'auto',
+                    work_dir: str, method: str = 'saga',
                     cpu_count: int = 4, params: Optional[Dict] = None) -> str:
         """
         Calcule un masque sol/sursol avec la méthode spécifiée
@@ -89,7 +89,7 @@ class MaskComputer:
             mns_file: Fichier MNS d'entrée
             output_mask_file: Fichier de sortie du masque
             work_dir: Répertoire de travail
-            method: Méthode à utiliser ('saga', 'pdal', ou 'auto')
+            method: Méthode à utiliser ('saga' ou 'pdal')
             cpu_count: Nombre de CPUs à utiliser
             params: Paramètres spécifiques à la méthode
             
@@ -102,11 +102,6 @@ class MaskComputer:
         
         if not self.available_methods:
             raise RuntimeError("Aucune méthode d'extraction disponible")
-        
-        # Choix automatique de la méthode si demandé
-        if method == 'auto':
-            method = self._choose_best_method()
-            logger.info(f"Méthode automatiquement sélectionnée: {method}")
         
         # Validation de la méthode
         if method not in self.available_methods:
@@ -140,16 +135,6 @@ class MaskComputer:
         except Exception as e:
             logger.error(f"❌ Erreur lors du calcul du masque avec {method}: {e}")
             raise
-    
-    def _choose_best_method(self) -> str:
-        """Choisit automatiquement la meilleure méthode disponible"""
-        # Pour l'instant, priorité à SAGA (plus mature dans GEMAUT)
-        if 'saga' in self.available_methods:
-            return 'saga'
-        elif 'pdal' in self.available_methods:
-            return 'pdal'
-        else:
-            raise RuntimeError("Aucune méthode disponible")
     
     def _get_default_params(self, method: str) -> Dict:
         """Retourne les paramètres par défaut pour la méthode spécifiée"""
@@ -414,7 +399,7 @@ class MaskComputer:
             'available_methods': self.available_methods,
             'saga_available': 'saga' in self.available_methods,
             'pdal_available': 'pdal' in self.available_methods,
-            'recommended_method': self._choose_best_method() if self.available_methods else None
+            'recommended_method': 'saga' if 'saga' in self.available_methods else ('pdal' if 'pdal' in self.available_methods else None)
         }
         
         if 'saga' in self.available_methods:

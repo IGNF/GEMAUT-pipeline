@@ -25,8 +25,8 @@ TILE_SAGA = 100
 PENTE_SAGA = 15
 
 # Paramètres de calcul automatique de masque
-MASK_COMPUTATION_METHODS = ['auto', 'saga', 'pdal']
-DEFAULT_MASK_METHOD = 'auto'
+MASK_COMPUTATION_METHODS = ['saga', 'pdal']
+DEFAULT_MASK_METHOD = 'saga'  # SAGA par défaut au lieu de 'auto'
 DEFAULT_MASK_COMPUTATION = True  # Calcul automatique par défaut
 
 # Paramètres PDAL pour le calcul de masque
