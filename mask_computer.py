@@ -166,21 +166,17 @@ class MaskComputer:
         """Calcule le masque avec SAGA"""
         logger.info("🔧 Utilisation de SAGA pour l'extraction...")
         
-        saga_instance = SAGAIntegration()
-        
         # Créer le répertoire de sortie si nécessaire
         os.makedirs(os.path.dirname(output_mask_file), exist_ok=True)
         
-        # Calculer le masque
-        saga_instance.compute_mask(
+        # Calculer le masque avec la méthode statique
+        SAGAIntegration.compute_mask_with_saga(
             mns_file=mns_file,
             output_mask_file=output_mask_file,
-            work_dir=work_dir,
+            saga_work_dir=work_dir,
             cpu_count=cpu_count,
-            params=params
+            saga_params=params
         )
-        
-
         
         return output_mask_file
     
