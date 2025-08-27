@@ -178,13 +178,10 @@ class GEMAUTPipeline:
                     logger.info(f"Méthodes disponibles: {', '.join(method_info['available_methods'])}")
                     
                     # Calculer le masque avec la méthode choisie
-                    if self.config.mask_method == 'auto':
-                        logger.info("Sélection automatique de la méthode...")
-                    else:
-                        logger.info(f"Utilisation de la méthode: {self.config.mask_method}")
+                    logger.info(f"Utilisation de la méthode: {self.config.mask_method}")
                     
                     # Obtenir les paramètres appropriés
-                    if self.config.mask_method in ['auto', 'saga']:
+                    if self.config.mask_method == 'saga':
                         logger.info("🔧 Utilisation des paramètres SAGA")
                         params = self.config.get_saga_params()
                     elif self.config.mask_method == 'pdal':
@@ -219,21 +216,13 @@ class GEMAUTPipeline:
                     self.config.mask_file = mask_file
                     logger.info(f"✅ Masque calculé avec succès: {mask_file}")
                     
-                except ImportError as e:
-                    logger.warning(f"❌ Module de calcul automatique non disponible: {e}")
-                    logger.info("🔧 Fallback vers la méthode SAGA traditionnelle...")
-                    self._fallback_saga_mask_computation(output_mask_file)
-                    self.config.mask_file = output_mask_file
-                
                 except Exception as e:
-                    logger.error(f"❌ Erreur lors du calcul automatique du masque: {e}")
+                    logger.error(f"❌ Erreur lors du calcul du masque: {e}")
                     logger.error(f"Type d'erreur: {type(e).__name__}")
                     import traceback
                     logger.error(f"Traceback: {traceback.format_exc()}")
-                    logger.info("🔧 Fallback vers la méthode SAGA traditionnelle...")
-                    self._fallback_saga_mask_computation(output_mask_file)
-                    self.config.mask_file = output_mask_file
-                
+                    raise RuntimeError(f"Impossible de calculer le masque avec la méthode {self.config.mask_method}")
+
             else:
                 logger.info("Calcul automatique désactivé. Veuillez fournir un fichier masque.")
                 raise ValueError("Aucun fichier masque fourni et calcul automatique désactivé")
@@ -264,22 +253,6 @@ class GEMAUTPipeline:
                 logger.info("🔧 Continuation avec le masque calculé")
         else:
             logger.info(f"Utilisation du masque fourni: {self.config.mask_file}")
-    
-    def _fallback_saga_mask_computation(self, output_mask_file: str):
-        """Méthode de fallback vers SAGA traditionnel"""
-        logger.info("🔧 Fallback vers SAGA traditionnel...")
-        
-        # Vérifier l'environnement SAGA
-        saga_integration.SAGAIntegration.log_saga_environment()
-        
-        # Calculer le masque avec SAGA
-        saga_integration.SAGAIntegration.compute_mask_with_saga(
-            self.config.temp_files['mns4saga'],
-            output_mask_file,
-            self.config.saga_dir,
-            self.config.cpu_count,
-            self.config.get_saga_params()
-        )
     
     def _prepare_mask_for_gemo(self):
         """Prépare le masque pour GEMO"""
@@ -414,7 +387,7 @@ def parse_arguments():
    gemaut --config config.yaml
 
 2. Avec arguments de ligne de commande:
-   gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--auto-mask] [--mask-method saga|pdal|auto] [--clean]
+   gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--auto-mask] [--mask-method saga|pdal] [--clean]
 
 3. Créer un template de configuration:
    gemaut --create-config config.yaml
@@ -425,9 +398,6 @@ def parse_arguments():
    
    # Avec PDAL (plus rapide, algorithme CSF)
    gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal
-   
-   # Choix automatique (recommandé)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method auto
 
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
     """,
