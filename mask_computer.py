@@ -123,7 +123,7 @@ class MaskComputer:
                 raise ValueError(f"Méthode non supportée: {method}")
             
             execution_time = time.time() - start_time
-            logger.info(f"✅ Masque calculé avec succès en {execution_time:.2s}")
+            logger.info(f"✅ Masque calculé avec succès en {execution_time:.2f}s")
             logger.info(f"📁 Fichier généré: {mask_file}")
             
             return mask_file
