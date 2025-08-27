@@ -12,6 +12,7 @@ import time
 from loguru import logger
 from typing import Dict, Optional, Tuple
 import subprocess
+import config
 
 # Import des modules d'intégration existants
 try:
