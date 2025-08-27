@@ -215,16 +215,12 @@ class GEMAUTPipeline:
                     logger.info(f"✅ Masque calculé avec succès: {mask_file}")
                     
                 except ImportError as e:
-                    logger.warning(f"Module de calcul automatique non disponible: {e}")
-                    logger.info("Fallback vers la méthode SAGA traditionnelle...")
-                    self._fallback_saga_mask_computation(output_mask_file)
-                    self.config.mask_file = output_mask_file
+                    logger.error(f"Module de calcul automatique non disponible: {e}")
+                    raise RuntimeError(f"Impossible d'importer le module de calcul automatique: {e}")
                 
                 except Exception as e:
                     logger.error(f"Erreur lors du calcul automatique du masque: {e}")
-                    logger.info("Fallback vers la méthode SAGA traditionnelle...")
-                    self._fallback_saga_mask_computation(output_mask_file)
-                    self.config.mask_file = output_mask_file
+                    raise RuntimeError(f"Erreur lors du calcul du masque avec {self.config.mask_method}: {e}")
                 
             else:
                 logger.info("Calcul automatique désactivé. Veuillez fournir un fichier masque.")
@@ -257,22 +253,7 @@ class GEMAUTPipeline:
         else:
             logger.info(f"Utilisation du masque fourni: {self.config.mask_file}")
     
-    def _fallback_saga_mask_computation(self, output_mask_file: str):
-        """Méthode de fallback vers SAGA traditionnel"""
-        logger.info("🔧 Fallback vers SAGA traditionnel...")
-        
-        # Vérifier l'environnement SAGA
-        saga_integration.SAGAIntegration.log_saga_environment()
-        
-        # Calculer le masque avec SAGA
-        saga_integration.SAGAIntegration.compute_mask_with_saga(
-            self.config.temp_files['mns4saga'],
-            output_mask_file,
-            self.config.saga_dir,
-            self.config.cpu_count,
-            self.config.get_saga_params()
-        )
-    
+
     def _prepare_mask_for_gemo(self):
         """Prépare le masque pour GEMO"""
         logger.info(config.INFO_MESSAGES['mask_labeling'])
