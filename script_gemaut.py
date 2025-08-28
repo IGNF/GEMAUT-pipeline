@@ -397,7 +397,6 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="""GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)
 Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
-        formatter_class=argparse.RawTextHelpFormatter,
         epilog="""EXEMPLES D'UTILISATION:
 
 1. Avec fichier de configuration YAML (recommandé):
