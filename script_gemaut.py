@@ -394,9 +394,12 @@ class GEMAUTPipeline:
 
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
+    CYAN = "\033[96m"
+    RESET = "\033[0m"
+    
     parser = argparse.ArgumentParser(
         description="""GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)
-Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
+{CYAN}Auteur: Nicolas Champion - nicolas.champion@ign.fr{RESET}""",
         epilog="""EXEMPLES D'UTILISATION:
 
 1. Avec fichier de configuration YAML (recommandé):
