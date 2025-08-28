@@ -380,7 +380,9 @@ class GEMAUTPipeline:
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
     parser = argparse.ArgumentParser(
-        description='GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)',
+        description='GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)'
+        Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
+        formatter_class=argparse.RawTextHelpFormatter,
         epilog="""EXEMPLES D'UTILISATION:
 
 1. Avec fichier de configuration YAML (recommandé):
@@ -394,13 +396,10 @@ def parse_arguments():
 
 4. Calcul automatique de masque:
    # Avec SAGA (méthode traditionnelle)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga --auto-mask
    
    # Avec PDAL (plus rapide, algorithme CSF)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal
-   
-   # Choix automatique (recommandé)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method auto
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal --auto-mask
 
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
     """,
