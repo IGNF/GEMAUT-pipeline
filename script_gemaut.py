@@ -377,11 +377,26 @@ class GEMAUTPipeline:
         logger.info(f"Temps total de traitement: {formatted_time}")
 
 
+# def parse_arguments():
+#     """Parse les arguments de ligne de commande"""
+#     parser = argparse.ArgumentParser(
+#         description='GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)'
+#         Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
+#         formatter_class=argparse.RawTextHelpFormatter,
+#         epilog="""EXEMPLES D'UTILISATION:
+        
+
+# def parse_arguments():
+#     """Parse les arguments de ligne de commande"""
+#     parser = argparse.ArgumentParser(
+#         description='GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)',
+#         epilog="""EXEMPLES D'UTILISATION:
+
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
     parser = argparse.ArgumentParser(
-        description='GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)'
-        Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
+        description="""GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)
+Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""EXEMPLES D'UTILISATION:
 
