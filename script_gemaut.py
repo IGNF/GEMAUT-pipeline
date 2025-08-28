@@ -420,6 +420,7 @@ Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
     
 Any Questions, please contact me at nicolas.champion@ign.fr
+
 """,
         formatter_class=argparse.RawTextHelpFormatter
     )
