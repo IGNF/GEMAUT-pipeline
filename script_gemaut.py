@@ -394,12 +394,11 @@ class GEMAUTPipeline:
 
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
-    CYAN = "\033[96m"
-    RESET = "\033[0m"
+
     
     parser = argparse.ArgumentParser(
         description="""GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)
-{CYAN}Auteur: Nicolas Champion - nicolas.champion@ign.fr{RESET}""",
+Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
         epilog="""EXEMPLES D'UTILISATION:
 
 1. Avec fichier de configuration YAML (recommandé):
@@ -419,7 +418,8 @@ def parse_arguments():
    gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal --auto-mask
 
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
-    """,
+    
+Any Questions, please contact me at nicolas.champion@ign.fr""",
         formatter_class=argparse.RawTextHelpFormatter
     )
 
