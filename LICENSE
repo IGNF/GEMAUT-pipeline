@@ -201,3 +201,19 @@ Copyright (c) 2025 Institut National de l'Information Géographique et Forestiè
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+-------------------------------------------------------------------------------
+Third-Party Dependencies Notice
+
+This project includes optional functionality that depends on third-party software:
+
+- SAGA GIS (GPL): GEMAUT uses external calls to the `saga_cmd` executable.
+  SAGA GIS is distributed under the GNU General Public License (GPL).
+  Users must comply with the GPL when installing or using SAGA GIS.
+
+- PDAL (BSD 3-Clause): GEMAUT can also rely on PDAL for ground point extraction.
+  PDAL is distributed under the BSD 3-Clause license.
+
+These components remain under their respective licenses. They are not part of
+the GEMAUT codebase, which is distributed under the Apache License, Version 2.0.
+
