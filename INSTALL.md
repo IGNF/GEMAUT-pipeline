@@ -13,6 +13,9 @@ Les dépendances C++ (SAGA-GIS et GEMO) doivent être installées une seule fois
 conda create -n gemaut_env python=3.11
 conda activate gemaut_env
 
+# Installer les outils de compilation nécessaires
+conda install -y cmake make cxx-compiler
+
 # Installer les dépendances système (SAGA + GEMO)
 ./install_deps.sh
 
@@ -47,6 +50,9 @@ Si vous préférez l'ancienne méthode avec un seul script :
 conda create -n gemaut_env python=3.11
 conda activate gemaut_env
 
+# Installer les outils de compilation
+conda install -y cmake make cxx-compiler
+
 # Installer GEMAUT et toutes ses dépendances
 ./install_gemaut.sh
 
@@ -58,11 +64,15 @@ conda deactivate && conda activate gemaut_env
 
 ## 📋 Prérequis
 
-### Dépendances système
-- **Git** : pour cloner SAGA-GIS
+### Dépendances conda (à installer d'abord)
+```bash
+conda install -y cmake make cxx-compiler
+```
+
+Ces packages fournissent :
 - **CMake** : pour compiler SAGA et GEMO
 - **Make** : pour l'installation
-- **Compilateur C++** : g++ ou x86_64-conda-linux-gnu-g++
+- **Compilateur C++** : x86_64-conda-linux-gnu-g++ (pas besoin de sudo !)
 
 ### Dépendances Python
 Les dépendances Python sont automatiquement installées avec pip :

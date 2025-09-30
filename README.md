@@ -30,13 +30,16 @@ cd GEMAUT-pipeline
 conda create -n gemaut_env python=3.11
 conda activate gemaut_env
 
-# 1. Installer les dépendances externes (SAGA + GEMO)
+# 1. Installer les outils de compilation
+conda install -y cmake make cxx-compiler
+
+# 2. Installer les dépendances externes (SAGA + GEMO)
 ./install_deps.sh
 
-# 2. Recharger l'environnement
+# 3. Recharger l'environnement
 conda deactivate && conda activate gemaut_env
 
-# 3. Installer GEMAUT
+# 4. Installer GEMAUT
 pip install -e .
 ```
 
@@ -50,6 +53,9 @@ cd GEMAUT-pipeline
 # Créer l'environnement conda & l'activer
 conda create -n gemaut_env python=3.11
 conda activate gemaut_env
+
+# Installer les outils de compilation
+conda install -y cmake make cxx-compiler
 
 # Lancer l'installation complète
 ./install_gemaut.sh
