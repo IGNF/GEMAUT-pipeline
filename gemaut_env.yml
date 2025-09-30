@@ -12,9 +12,8 @@ dependencies:
   - loguru
   - cmake
   - make
+  - cxx-compiler
   - git
-  - gcc_linux-64
-  - gxx_linux-64
   - pdal
   - python-pdal
   - wxwidgets
