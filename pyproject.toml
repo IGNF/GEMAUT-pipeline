@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gemaut"
+version = "0.1.0"
+description = "GEMAUT - Génération de Modèles Automatiques de Terrain"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Nicolas Champion", email = "nicolas.champion@ign.fr"}
+]
+keywords = ["DTM", "DSM", "LiDAR", "terrain", "GEMO", "SAGA"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: GIS",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "rasterio>=1.3.0",
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "tqdm>=4.62.0",
+    "loguru>=0.6.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/IGNF/GEMAUT-pipeline"
+Repository = "https://github.com/IGNF/GEMAUT-pipeline"
+Issues = "https://github.com/IGNF/GEMAUT-pipeline/issues"
+
+[project.scripts]
+gemaut = "script_gemaut:main"
+
+[tool.setuptools]
+py-modules = ["script_gemaut", "config", "config_manager", "gemaut_config", "gemo_executor", "image_utils", "mask_computer", "pdal_integration", "ground_extraction_interface", "saga_integration", "tile_processor"]
+packages = ["SAGA"]

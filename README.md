@@ -19,26 +19,43 @@
 
 ## 🏗️ Installation
 
-### Prérequis
-- Conda (Miniconda ou Anaconda)
-- Git
+### Méthode recommandée : Installation via pip
 
-### Installation automatique
+```bash
+# Cloner le dépôt
+git clone https://github.com/IGNF/GEMAUT-pipeline.git
+cd GEMAUT-pipeline
+
+# Créer et activer un environnement conda
+conda create -n gemaut_env python=3.11
+conda activate gemaut_env
+
+# 1. Installer les dépendances externes (SAGA + GEMO)
+./install_deps.sh
+
+# 2. Recharger l'environnement
+conda deactivate && conda activate gemaut_env
+
+# 3. Installer GEMAUT
+pip install -e .
+```
+
+### Méthode alternative : Script bash complet
+
 ```bash
 # Cloner le dépôt
 git clone https://github.com/IGNF/GEMAUT-pipeline.git
 cd GEMAUT-pipeline
 
 # Créer l'environnement conda & l'activer
-conda env create -n gemaut_env -f gemaut_env.yml
+conda create -n gemaut_env python=3.11
 conda activate gemaut_env
 
-# Rendre le script d'installation exécutable
-chmod +x install_gemaut.sh
-
-# Lancer l'installation
+# Lancer l'installation complète
 ./install_gemaut.sh
 ```
+
+📖 **Pour plus de détails**, consultez [INSTALL.md](INSTALL.md)
 ---
 
 ## 🎯 Utilisation
