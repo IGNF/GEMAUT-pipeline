@@ -18,17 +18,6 @@ SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
 GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
 PARALLEL_JOBS=$(nproc)
 
-# Vérification des dépendances
-#check_dependencies() {
-#    local deps=("git" "cmake" "make" "g++")
-#    for dep in "${deps[@]}"; do
-#        if ! command -v "$dep" &> /dev/null; then
-#            log_error "$dep n'est pas installé"
-#            exit 1
-#        fi
-#    done
-#}wq
-
 check_dependencies() {
     local deps=("git" "cmake" "make")
     for dep in "${deps[@]}"; do
@@ -142,9 +131,9 @@ install_saga() {
     log_info "Installation de SAGA-GIS terminée avec succès"
 }
 
-# Installation de GEMAUT
-install_gemaut() {
-    log_info "Installation de GEMAUT..."
+# Installation de GEMO
+install_gemo() {
+    log_info "Installation de GEMO..."
     
     mkdir -p "$GEMAUT_INSTALL_DIR"
     cd "$CURRENT_DIR/GEMO"
@@ -172,51 +161,29 @@ setup_conda_env() {
     cp deactivate_gemaut.sh "$CONDA_PREFIX/etc/conda/deactivate.d/"
 }
 
-# Installation de GEMAUT avec pip
-install_gemaut_pip() {
-    log_info "Installation de GEMAUT avec pip..."
-    cd "$CURRENT_DIR"
-    
-    # Installation en mode éditable
-    if ! pip install -e .; then
-        log_error "Échec de l'installation de GEMAUT"
-        exit 1
-    fi
-    
-    log_info "GEMAUT installé avec succès"
-}
-
 # Nettoyage
 cleanup() {
     log_info "Nettoyage des fichiers temporaires..."
     if [ -d "saga-gis-code" ]; then rm -rf saga-gis-code; fi
-    find . -name "build" -type d -exec rm -rf {} +
+    find . -name "build" -type d -exec rm -rf {} + 2>/dev/null || true
 }
 
 # Création du script de désinstallation
 create_uninstall_script() {
     log_info "Création du script de désinstallation..."
-    cat > uninstall_gemaut.sh << 'EOF'
+    cat > uninstall_deps.sh << EOF
 #!/bin/bash
-# Désinstaller GEMAUT (pip)
-pip uninstall -y gemaut
-
-# Supprimer SAGA et GEMO
-rm -rf "$HOME/GEMAUT/saga_install"
-rm -rf "$HOME/GEMAUT/GEMO"
-
-# Supprimer les scripts d'activation
+rm -rf "$SAGA_INSTALL_DIR"
+rm -rf "$GEMAUT_INSTALL_DIR"
 rm -f "$CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh"
 rm -f "$CONDA_PREFIX/etc/conda/deactivate.d/deactivate_gemaut.sh"
-
-echo "Désinstallation terminée"
 EOF
-    chmod +x uninstall_gemaut.sh
+    chmod +x uninstall_deps.sh
 }
 
 # Programme principal
 main() {
-    log_info "Début de l'installation de GEMAUT..."
+    log_info "Début de l'installation des dépendances externes (SAGA + GEMO)..."
     
     # Vérifications initiales
     check_dependencies
@@ -228,9 +195,8 @@ main() {
     
     # Installation
     install_saga
-    install_gemaut
+    install_gemo
     setup_conda_env
-    install_gemaut_pip
     
     # Finalisation
     create_uninstall_script
@@ -239,7 +205,7 @@ main() {
     # Recharger l'environnement
     source "$CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh"
     
-    log_info "Installation terminée avec succès!"
+    log_info "Installation des dépendances terminée avec succès!"
 
     log_info "Veuillez exécuter la commande suivante pour recharger l'environnement :"
     echo ""
@@ -247,18 +213,7 @@ main() {
     echo ""
     log_info "Cette commande est ESSENTIELLE pour que GEMAUT fonctionne correctement !"
     echo ""
-   
-    log_info "Pour vérifier que tout s'est bien passé, tapez:"
-    echo ""
-    echo -e "${GREEN}python3 -m unittest discover tests/ -v"
-    echo ""
-
-
-    log_info "Pour utiliser GEMAUT, tapez:"
-    echo ""
-    echo "    gemaut --help"
-    echo ""
 }
 
 # Exécution du programme principal
-main "$@" 
+main "$@"
