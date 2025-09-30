@@ -31,5 +31,3 @@ dependencies:
   - py-opencv
   - gsl
   - pip
-  - pip:
-    - pdal-plugins
