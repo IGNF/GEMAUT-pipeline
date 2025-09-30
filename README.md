@@ -26,20 +26,17 @@
 git clone https://github.com/IGNF/GEMAUT-pipeline.git
 cd GEMAUT-pipeline
 
-# Créer et activer un environnement conda
-conda create -n gemaut_env python=3.11
+# Créer et activer un environnement conda (avec outils de compilation)
+conda env create -f gemaut_env.yml
 conda activate gemaut_env
 
-# 1. Installer les outils de compilation
-conda install -y cmake make cxx-compiler
-
-# 2. Installer les dépendances externes (SAGA + GEMO)
+# 1. Installer les dépendances externes (SAGA + GEMO)
 ./install_deps.sh
 
-# 3. Recharger l'environnement
+# 2. Recharger l'environnement
 conda deactivate && conda activate gemaut_env
 
-# 4. Installer GEMAUT
+# 3. Installer GEMAUT
 pip install -e .
 ```
 
@@ -51,11 +48,8 @@ git clone https://github.com/IGNF/GEMAUT-pipeline.git
 cd GEMAUT-pipeline
 
 # Créer l'environnement conda & l'activer
-conda create -n gemaut_env python=3.11
+conda env create -f gemaut_env.yml
 conda activate gemaut_env
-
-# Installer les outils de compilation
-conda install -y cmake make cxx-compiler
 
 # Lancer l'installation complète
 ./install_gemaut.sh

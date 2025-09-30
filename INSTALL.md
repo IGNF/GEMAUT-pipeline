@@ -9,12 +9,9 @@ GEMAUT peut être installé de deux façons : via pip (recommandé) ou avec le s
 Les dépendances C++ (SAGA-GIS et GEMO) doivent être installées une seule fois :
 
 ```bash
-# Créer et activer un environnement conda
-conda create -n gemaut_env python=3.11
+# Créer et activer un environnement conda (avec outils de compilation inclus)
+conda env create -f gemaut_env.yml
 conda activate gemaut_env
-
-# Installer les outils de compilation nécessaires
-conda install -y cmake make cxx-compiler
 
 # Installer les dépendances système (SAGA + GEMO)
 ./install_deps.sh
@@ -47,11 +44,8 @@ Si vous préférez l'ancienne méthode avec un seul script :
 
 ```bash
 # Créer et activer un environnement conda
-conda create -n gemaut_env python=3.11
+conda env create -f gemaut_env.yml
 conda activate gemaut_env
-
-# Installer les outils de compilation
-conda install -y cmake make cxx-compiler
 
 # Installer GEMAUT et toutes ses dépendances
 ./install_gemaut.sh
@@ -64,15 +58,14 @@ conda deactivate && conda activate gemaut_env
 
 ## 📋 Prérequis
 
-### Dépendances conda (à installer d'abord)
-```bash
-conda install -y cmake make cxx-compiler
-```
-
-Ces packages fournissent :
+### Environnement conda
+Le fichier `gemaut_env.yml` inclut automatiquement :
 - **CMake** : pour compiler SAGA et GEMO
 - **Make** : pour l'installation
-- **Compilateur C++** : x86_64-conda-linux-gnu-g++ (pas besoin de sudo !)
+- **cxx-compiler** : Compilateur C++ (pas besoin de sudo !)
+- **Python** et toutes les dépendances Python
+
+Tout est installé automatiquement avec `conda env create -f gemaut_env.yml` !
 
 ### Dépendances Python
 Les dépendances Python sont automatiquement installées avec pip :
