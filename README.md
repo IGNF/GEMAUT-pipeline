@@ -10,7 +10,7 @@
 ## ✨ Nouvelles fonctionnalités
 
 - **⚙️ Calcul automatique de masques** avec `--auto-mask`
-- **🎯 Choix de méthode** : SAGA ou PDAL avec `--mask-method`
+- **🎯 Choix de méthode** : PDAL ou SAGA avec `--mask-method`
 - **📋 Configuration simplifiée** : Utilisation d'un fichier de configuration YAML
 - **🧪 Tests unitaires complets** : Suite de tests automatisés pour validation
 - **🚀 Interface utilisateur simplifiée** : Commande `gemaut` pour une utilisation optimisée
@@ -72,18 +72,6 @@ gemaut --help
 
 ### 3. Exemples d'utilisation
 
-#### **Calcul automatique de masque avec SAGA**
-```bash
-gemaut \
-    --mns /chemin/vers/MNS_in.tif \
-    --out /chemin/vers/MNT_SAGA.tif \
-    --reso 4 \
-    --cpu 24 \
-    --RepTra RepTra_SAGA \
-    --auto-mask \
-    --mask-method saga
-```
-
 #### **Calcul automatique de masque avec PDAL**
 ```bash
 gemaut \
@@ -94,6 +82,18 @@ gemaut \
     --RepTra RepTra_PDAL \
     --auto-mask \
     --mask-method pdal
+```
+
+#### **Calcul automatique de masque avec SAGA**
+```bash
+gemaut \
+    --mns /chemin/vers/MNS_in.tif \
+    --out /chemin/vers/MNT_SAGA.tif \
+    --reso 4 \
+    --cpu 24 \
+    --RepTra RepTra_SAGA \
+    --auto-mask \
+    --mask-method saga
 ```
 
 #### **Utilisation traditionnelle avec un masque fourni par l'utilisateur**
