@@ -241,7 +241,7 @@ class ConfigManager:
     @staticmethod
     def convert_to_gemaut_config(config: GEMAUTConfigFromFile):
         """Convertit la configuration YAML en GEMAUTConfig"""
-        from gemaut_config import GEMAUTConfig
+        from .gemaut_config import GEMAUTConfig
         
         return GEMAUTConfig(
             mns_input=config.mns_file,

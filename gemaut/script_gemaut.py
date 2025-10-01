@@ -14,12 +14,12 @@ import argparse
 from loguru import logger
 
 # Import des modules refactorisés
-import config
-from gemaut_config import GEMAUTConfig
-import image_utils
-import tile_processor
-import gemo_executor
-import saga_integration
+from . import config
+from .gemaut_config import GEMAUTConfig
+from . import image_utils
+from . import tile_processor
+from . import gemo_executor
+from . import saga_integration
 
 
 class GEMAUTPipeline:
@@ -486,7 +486,7 @@ def main():
         # Gérer les différents modes
         if args.create_config:
             # Mode création de template
-            from config_manager import ConfigManager
+            from .config_manager import ConfigManager
             ConfigManager.create_template(args.create_config)
             print(f"Template de configuration créé: {args.create_config}")
             print("Modifiez ce fichier selon vos besoins, puis utilisez 'gemaut --config' pour l'exécuter.")
@@ -494,7 +494,7 @@ def main():
         
         if args.config:
             # Mode fichier de configuration YAML
-            from config_manager import ConfigManager
+            from .config_manager import ConfigManager
             yaml_config = ConfigManager.load_config(args.config)
             ConfigManager.validate_config(yaml_config)
             config_obj = ConfigManager.convert_to_gemaut_config(yaml_config)

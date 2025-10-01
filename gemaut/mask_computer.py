@@ -12,11 +12,11 @@ import time
 from loguru import logger
 from typing import Dict, Optional, Tuple
 import subprocess
-import config
+from . import config
 
 # Import des modules d'intégration existants
 try:
-    from saga_integration import SAGAIntegration
+    from .saga_integration import SAGAIntegration
     SAGA_AVAILABLE = True
 except ImportError:
     SAGA_AVAILABLE = False
@@ -24,7 +24,7 @@ except ImportError:
 
 try:
     # Import direct de PDAL sans dépendre d'un chemin codé en dur
-    from pdal_integration import PDALIntegration
+    from .pdal_integration import PDALIntegration
     PDAL_AVAILABLE = True
 except ImportError:
     PDAL_AVAILABLE = False

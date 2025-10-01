@@ -17,7 +17,7 @@ from typing import Dict
 import json
 import subprocess
 
-from ground_extraction_interface import GroundExtractionInterface
+from .ground_extraction_interface import GroundExtractionInterface
 
 
 class PDALIntegration(GroundExtractionInterface):
