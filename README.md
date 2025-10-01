@@ -37,7 +37,7 @@ conda activate gemaut_env
 conda deactivate && conda activate gemaut_env
 
 # 3. Installer GEMAUT
-pip install -e .
+pip install .
 ```
 
 ### Méthode alternative : Script bash complet

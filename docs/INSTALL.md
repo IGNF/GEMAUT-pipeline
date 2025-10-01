@@ -23,8 +23,8 @@ conda deactivate && conda activate gemaut_env
 ### Étape 2 : Installer GEMAUT avec pip
 
 ```bash
-# Installation en mode développement (éditable)
-pip install -e .
+# Installation standard
+pip install .
 
 # OU installation depuis PyPI (quand disponible)
 # pip install gemaut
