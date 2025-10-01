@@ -49,6 +49,13 @@ check_conda_env() {
 # Sauvegarde des installations existantes
 backup_existing_install() {
     local install_dir=$1
+    
+    # Ne PAS sauvegarder si c'est l'environnement conda lui-même
+    if [ "$install_dir" = "$CONDA_PREFIX" ]; then
+        log_info "Installation dans l'environnement conda - pas de sauvegarde nécessaire"
+        return 0
+    fi
+    
     if [ -d "$install_dir" ]; then
         local backup_dir="${install_dir}_backup_$(date +%Y%m%d_%H%M%S)"
         log_warning "Installation existante trouvée dans $install_dir"
