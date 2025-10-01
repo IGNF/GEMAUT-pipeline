@@ -168,7 +168,7 @@ class GEMAUTPipeline:
                 
                 # Importer le module de calcul de masque
                 try:
-                    from mask_computer import MaskComputer
+                    from .mask_computer import MaskComputer
                     mask_computer = MaskComputer()
                     
                     # Obtenir les informations sur les méthodes disponibles
