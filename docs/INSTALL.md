@@ -14,7 +14,7 @@ conda env create -f gemaut_env.yml
 conda activate gemaut_env
 
 # Installer les dépendances système (SAGA + GEMO)
-./install_deps.sh
+./scripts/install_deps.sh
 
 # Recharger l'environnement
 conda deactivate && conda activate gemaut_env
@@ -48,7 +48,7 @@ conda env create -f gemaut_env.yml
 conda activate gemaut_env
 
 # Installer GEMAUT et toutes ses dépendances
-./install_gemaut.sh
+./scripts/install_gemaut.sh
 
 # Recharger l'environnement
 conda deactivate && conda activate gemaut_env
