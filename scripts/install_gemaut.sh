@@ -167,9 +167,10 @@ setup_conda_env() {
     mkdir -p "$CONDA_PREFIX/etc/conda/activate.d"
     mkdir -p "$CONDA_PREFIX/etc/conda/deactivate.d"
     
-    # Copier les scripts
-    cp activate_gemaut.sh "$CONDA_PREFIX/etc/conda/activate.d/"
-    cp deactivate_gemaut.sh "$CONDA_PREFIX/etc/conda/deactivate.d/"
+    # Copier les scripts (ils sont dans le dossier scripts/)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    cp "$SCRIPT_DIR/activate_gemaut.sh" "$CONDA_PREFIX/etc/conda/activate.d/"
+    cp "$SCRIPT_DIR/deactivate_gemaut.sh" "$CONDA_PREFIX/etc/conda/deactivate.d/"
 }
 
 # Installation de GEMAUT avec pip
