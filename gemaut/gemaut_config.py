@@ -9,7 +9,7 @@ Gère tous les paramètres et constantes du pipeline
 import os
 from dataclasses import dataclass
 from typing import Optional
-import config
+from . import config
 
 
 @dataclass

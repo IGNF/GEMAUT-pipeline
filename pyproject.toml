@@ -48,8 +48,7 @@ Repository = "https://github.com/IGNF/GEMAUT-pipeline"
 Issues = "https://github.com/IGNF/GEMAUT-pipeline/issues"
 
 [project.scripts]
-gemaut = "script_gemaut:main"
+gemaut = "gemaut.script_gemaut:main"
 
 [tool.setuptools]
-py-modules = ["script_gemaut", "config", "config_manager", "gemaut_config", "gemo_executor", "image_utils", "mask_computer", "pdal_integration", "ground_extraction_interface", "saga_integration", "tile_processor"]
-packages = ["SAGA"]
+packages = ["gemaut", "SAGA"]

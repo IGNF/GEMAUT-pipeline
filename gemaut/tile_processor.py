@@ -15,7 +15,7 @@ from tqdm import tqdm
 import random
 from loguru import logger
 from typing import Tuple, List, Dict
-import image_utils
+from . import image_utils
 
 
 class TileCalculator:

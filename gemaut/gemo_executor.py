@@ -14,7 +14,7 @@ from tqdm import tqdm
 import signal
 from loguru import logger
 from typing import List, Dict
-import image_utils
+from . import image_utils
 
 
 class GEMOExecutor:
