@@ -14,8 +14,8 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # Configuration par défaut
 CURRENT_DIR=${PWD}
-SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
-GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
+SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$CONDA_PREFIX}
+GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$CONDA_PREFIX}
 PARALLEL_JOBS=$(nproc)
 
 check_dependencies() {
@@ -174,10 +174,16 @@ create_uninstall_script() {
     log_info "Création du script de désinstallation..."
     cat > uninstall_deps.sh << EOF
 #!/bin/bash
-rm -rf "$SAGA_INSTALL_DIR"
-rm -rf "$GEMAUT_INSTALL_DIR"
+# Désinstallation de SAGA et GEMO (installés dans l'environnement conda)
+# Note: Ils sont dans \$CONDA_PREFIX, donc supprimés avec l'environnement
+
+# Supprimer les scripts d'activation
 rm -f "$CONDA_PREFIX/etc/conda/activate.d/activate_gemaut.sh"
 rm -f "$CONDA_PREFIX/etc/conda/deactivate.d/deactivate_gemaut.sh"
+
+echo "SAGA et GEMO sont installés dans l'environnement conda."
+echo "Pour les supprimer complètement, désinstallez l'environnement conda:"
+echo "  conda env remove -n \$(basename \$CONDA_PREFIX)"
 EOF
     chmod +x uninstall_deps.sh
 }
