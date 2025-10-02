@@ -1,0 +1,40 @@
+input:
+  mns_file: ./tests/MNS_IN.tif
+  mask_file: null
+  init_file: null
+  output_file: ./tests/MNT_yaml_test.tif
+  work_dir: /tmp
+processing:
+  resolution: 4.0
+  cpu_count: 4
+  clean_temp: false
+  verbose: true
+gemo:
+  sigma: 0.5
+  regul: 0.01
+  norme: hubertukey
+tiling:
+  tile_size: 300
+  pad_size: 120
+nodata:
+  external: -32768
+  internal: -32767
+mask:
+  ground_value: 0
+saga:
+  radius: 100
+  tile: 100
+  pente: 15
+mask_computation:
+  auto_computation: true
+  method: pdal
+pdal:
+  csf:
+    max_iterations: 500
+    class_threshold: 0.8
+    cell_size: 2.0
+    time_step: 0.8
+    rigidness: 5
+    hdiff: 0.2
+    smooth: true
+
