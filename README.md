@@ -193,6 +193,6 @@ pdal:
 
 ## Licence
 
-Ce projet est sous licence [LICENSE](LICENSE).
+Ce projet est sous la licence [LICENSE](LICENSE).
 
 ---
