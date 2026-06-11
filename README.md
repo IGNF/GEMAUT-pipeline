@@ -7,6 +7,14 @@
 
 **L'outil Open Source pour le passage MNS > MNT Haute Résolution développé au Service de l'Imagerie Spatiale de l'IGN 🚀 **
 
+## 📖 Description / Publication
+
+GEMAUT est décrit en détail dans cette article publié dans la *Revue Française de Photogrammétrie et de Télédétection (RFPT)* :
+
+> 👉 [Lire l'article sur le site de la RFPT](https://rfpt.sfpt.fr/index.php/RFPT/article/view/739)
+
+Si vous utilisez GEMAUT dans vos travaux, merci de citer cette publication.
+
 ## ✨ Nouvelles fonctionnalités
 
 - **⚙️ Calcul automatique de masques** avec `--auto-mask`
