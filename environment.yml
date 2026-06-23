@@ -30,10 +30,10 @@ dependencies:
   - suitesparse
   - tbb-devel
   
-  # Vision par ordinateur (nécessaire pour GEMO)
-  - opencv
-  - libopencv
-  - py-opencv
+  # Vision par ordinateur (nécessaire pour GEMO ; OpenCV 5 non supporté pour l'instant)
+  - libopencv>=4.5,<5
+  - opencv>=4.5,<5
+  - py-opencv>=4.5,<5
   
   # Interface graphique (pour SAGA)
   - wxwidgets
