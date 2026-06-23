@@ -16,8 +16,8 @@ else
     exit 1
 fi
 
-# Mettre à jour LD_LIBRARY_PATH dynamiquement à CHAQUE activation
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib:$SAGA_LIB_DIR
+# Mettre à jour LD_LIBRARY_PATH (SAGA + wxWidgets conda)
+export LD_LIBRARY_PATH=$SAGA_LIB_DIR:$SAGA_INSTALL_DIR/lib/saga:$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 # Proj data
 export PROJ_LIB=$CONDA_PREFIX/share/proj

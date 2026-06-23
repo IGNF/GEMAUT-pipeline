@@ -115,6 +115,32 @@ g++ --version
 x86_64-conda-linux-gnu-g++ --version
 ```
 
+### `opencv2/core/types_c.h: No such file or directory` (SAGA)
+Ce message apparaît si OpenCV 4+ est détecté lors de la compilation de SAGA : le module
+`imagery_opencv` de SAGA utilise l'ancienne API C d'OpenCV, supprimée depuis OpenCV 4.
+
+GEMAUT n'utilise pas ce module (seulement `grid_filter` pour le masque). Le script
+`install_deps.sh` désactive donc sa compilation avec `-DWITH_TOOLS_OPENCV=OFF`.
+
+Si vous compilez SAGA manuellement, ajoutez cette option à `cmake`. Pour corriger un
+environnement conda déjà créé avec OpenCV 5 :
+```bash
+conda install -c conda-forge "libopencv>=4.5,<5" "opencv>=4.5,<5" "py-opencv>=4.5,<5"
+```
+Puis relancez `./scripts/install_deps.sh`.
+
+### `undefined reference to wxImage` (SAGA, module io_webservices)
+En mode headless (`-DWITH_GUI=OFF`), le module `io_webservices` de SAGA lie seulement
+`wxWidgets html` alors qu'il utilise `wxImage` (composant `core`). Le script
+`install_deps.sh` applique automatiquement le correctif après le clonage.
+
+Pour un build manuel déjà en cours :
+```bash
+sed -i 's/COMPONENTS html/COMPONENTS core html/' \
+  saga-gis-code/saga-gis/src/tools/io/io_webservices/CMakeLists.txt
+cd saga-gis-code/saga-gis/build && cmake .. && make -j$(nproc)
+```
+
 ### `ModuleNotFoundError: No module named 'SAGA'`
 Réinstallez GEMAUT :
 ```bash

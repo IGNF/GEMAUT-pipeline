@@ -64,6 +64,24 @@ backup_existing_install() {
     fi
 }
 
+# Correctifs upstream SAGA pour compilation headless (WITH_GUI=OFF) avec wxWidgets conda
+patch_saga_for_headless_build() {
+    local saga_src="$1"
+    local webservices_cmake="${saga_src}/src/tools/io/io_webservices/CMakeLists.txt"
+
+    if [ ! -f "$webservices_cmake" ]; then
+        log_error "Fichier CMake introuvable: $webservices_cmake"
+        exit 1
+    fi
+
+    # io_webservices utilise wxImage mais ne liait que le composant html
+    if grep -q 'find_package(wxWidgets COMPONENTS html REQUIRED QUIET)' "$webservices_cmake"; then
+        log_info "Patch SAGA: ajout du composant wxWidgets 'core' pour io_webservices..."
+        sed -i 's/find_package(wxWidgets COMPONENTS html REQUIRED QUIET)/find_package(wxWidgets COMPONENTS core html REQUIRED QUIET)/' \
+            "$webservices_cmake"
+    fi
+}
+
 # Installation de SAGA-GIS
 install_saga() {
     log_info "Installation de SAGA-GIS..."
@@ -101,6 +119,8 @@ install_saga() {
         log_error "Structure du dépôt SAGA-GIS inattendue"
         exit 1
     fi
+
+    patch_saga_for_headless_build "$(pwd)"
     
     # Supprimer l'ancien build si existant
     if [ -d "build" ]; then 
@@ -110,12 +130,17 @@ install_saga() {
     # Créer et entrer dans le répertoire build
     mkdir build && cd build
     
-    # Configuration et compilation avec options spécifiques pour CentOS 7
+    # Configuration et compilation
+    # WITH_TOOLS_OPENCV=OFF : le module imagery_opencv de SAGA utilise l'API C d'OpenCV
+    # (types_c.h), supprimée depuis OpenCV 4. GEMAUT n'utilise que grid_filter, pas OpenCV.
     log_info "Configuration de SAGA-GIS..."
     if ! cmake -DCMAKE_BUILD_TYPE=Release \
                -DCMAKE_INSTALL_PREFIX="$SAGA_INSTALL_DIR" \
+               -DCMAKE_INSTALL_RPATH="${SAGA_INSTALL_DIR}/lib;${SAGA_INSTALL_DIR}/lib/saga;${CONDA_PREFIX}/lib" \
+               -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE \
                -DWITH_GUI=OFF \
                -DWITH_PYTHON=ON \
+               -DWITH_TOOLS_OPENCV=OFF \
                ..; then
         log_error "Échec de la configuration CMake"
         exit 1
