@@ -69,7 +69,7 @@ class GEMOExecutor:
                     gemo_params['no_data_value'], gemo_params['norme']
                 )
                 
-                logger.debug(f"Exécution GEMO pour tuile {x}_{y}: {cmd}")
+                #logger.debug(f"Exécution GEMO pour tuile {x}_{y}: {cmd}")
                 result = GEMOExecutor.run_command_without_output(cmd)
                 
                 if result == 0:

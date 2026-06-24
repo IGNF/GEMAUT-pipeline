@@ -21,6 +21,7 @@ from . import tile_processor
 from . import gemo_executor
 from . import saga_integration
 
+from pprint import pprint
 
 class GEMAUTPipeline:
     """Pipeline principal GEMAUT refactorisé"""
@@ -37,6 +38,9 @@ class GEMAUTPipeline:
         logger.remove()  # Supprimer les handlers par défaut
         logger.add(log_file_path, level=config.LOG_LEVEL, format=config.LOG_FORMAT)
         
+        #print("=== HANDLERS ===")
+        #pprint(logger._core.handlers)
+
         # Ajouter un handler pour la console si l'option verbose est activée
         if self.config.verbose:
             logger.add(sys.stderr, level=config.LOG_LEVEL, format=config.LOG_FORMAT)
@@ -76,19 +80,19 @@ class GEMAUTPipeline:
             
             # Étape 7: Calcul du nombre de dalles
             nbre_dalle_x, nbre_dalle_y = self._calculate_tile_count()
-            
+
             # Étape 8: Découpage des dalles
             self._cut_tiles()
             
             # Étape 9: Exécution de GEMO en parallèle
             self._run_gemo_parallel(nbre_dalle_x, nbre_dalle_y)
-            
+
             # Étape 10: Assemblage final
             self._assemble_final_result(nbre_dalle_x, nbre_dalle_y)
-            
+
             # Étape 11: Application du masque NoData final
             self._apply_final_nodata_mask()
-            
+
             # Étape 12: Nettoyage (optionnel)
             if self.config.clean_temp:
                 self._cleanup_temp_files()
@@ -376,7 +380,6 @@ class GEMAUTPipeline:
         formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
         logger.info(f"Temps total de traitement: {formatted_time}")
 
-
 # def parse_arguments():
 #     """Parse les arguments de ligne de commande"""
 #     parser = argparse.ArgumentParser(
@@ -385,7 +388,6 @@ class GEMAUTPipeline:
 #         formatter_class=argparse.RawTextHelpFormatter,
 #         epilog="""EXEMPLES D'UTILISATION:
         
-
 # def parse_arguments():
 #     """Parse les arguments de ligne de commande"""
 #     parser = argparse.ArgumentParser(
@@ -395,7 +397,6 @@ class GEMAUTPipeline:
 def parse_arguments():
     """Parse les arguments de ligne de commande"""
 
-    
     parser = argparse.ArgumentParser(
         description="""GEMAUT - Génération de Modèles Automatiques de Terrain (Version Refactorisée)
 Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
@@ -475,7 +476,6 @@ Any Questions, please contact me at nicolas.champion@ign.fr
         parser.error("--groundval est obligatoire si --masque est renseigné.")
 
     return args
-
 
 def main():
     """Fonction principale"""
