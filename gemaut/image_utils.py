@@ -115,10 +115,13 @@ class RasterProcessor:
     @staticmethod
     def save_raster(data: np.ndarray, file_path: str, profile: dict) -> None:
         """Sauvegarde une image raster"""
+        #print(f"PID={os.getpid()}  handlers={logger._core.handlers}")
+
         try:
             with rasterio.open(file_path, 'w', **profile) as dst:
                 dst.write(data, 1)
-            logger.debug(f"Image sauvegardée: {file_path}")
+            #logger.debug(f"Image sauvegardée: {file_path}")
+
         except Exception as e:
             logger.error(f"Erreur lors de la sauvegarde de {file_path}: {e}")
             raise
