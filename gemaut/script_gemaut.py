@@ -275,6 +275,7 @@ class GEMAUTPipeline:
             self.config.mns_input,
             self.config.temp_files['masque_nodata'],
             self.config.nodata_ext,
+            self.config.nodata_int,
             self.config.nodata_interne_mask
         )
     
@@ -289,6 +290,16 @@ class GEMAUTPipeline:
             self.config.resolution,
             self.config.nodata_ext
         )
+        
+        # Combler les trous restants après sous-échantillonnage
+        mns_sous_ech_filled = self.config.temp_files['mns_sous_ech'] + '.filled.tif'
+        image_utils.HoleFiller.fill_holes_simple(
+            self.config.temp_files['mns_sous_ech'],
+            mns_sous_ech_filled,
+            self.config.nodata_int,
+            self.config.nodata_ext
+        )
+        shutil.move(mns_sous_ech_filled, self.config.temp_files['mns_sous_ech'])
         
         # Rééchantillonnage du masque
         gemo_executor.GDALProcessor.resample_mask(
@@ -306,14 +317,21 @@ class GEMAUTPipeline:
         #     logger.info(f"💾 Masque SAGA corrigé sauvegardé: {mask_corrige_saga}")
         #     logger.info("   Ce fichier est géographiquement aligné avec le MNS")
         
-        # Rééchantillonnage du fichier d'initialisation
-        init_file = self.config.mns_input if self.config.init_file is None else self.config.init_file
-        gemo_executor.GDALProcessor.resample_init(
-            init_file,
-            self.config.temp_files['init_sous_ech'],
-            self.config.resolution,
-            self.config.nodata_ext
-        )
+        # Initialisation GEMO : même surface que le MNS comblé sous-échantillonné.
+        # GEMO normalise INIT avec le min/max du MNS (GEA.cpp) : des -32767 dans INIT
+        # produisent un point de départ aberrant pour l'optimiseur.
+        if self.config.init_file is None:
+            shutil.copy2(
+                self.config.temp_files['mns_sous_ech'],
+                self.config.temp_files['init_sous_ech']
+            )
+        else:
+            gemo_executor.GDALProcessor.resample_init(
+                self.config.init_file,
+                self.config.temp_files['init_sous_ech'],
+                self.config.resolution,
+                self.config.nodata_ext
+            )
     
     def _calculate_tile_count(self):
         """Calcule le nombre de dalles"""
