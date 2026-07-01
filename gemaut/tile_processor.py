@@ -7,6 +7,7 @@ Gère le découpage des grandes images en tuiles et leur assemblage final
 """
 
 import os
+import signal
 import numpy as np
 import rasterio
 from rasterio.windows import Window, from_bounds
@@ -63,6 +64,12 @@ class TileCalculator:
 
 class TileCutter:
     """Classe pour le découpage des images en tuiles"""
+    
+    @staticmethod
+    def init_worker():
+        """Initialise les workers multiprocessing (pas de logs console)."""
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        logger.remove()
     
     @staticmethod
     def cut_tile(args: Tuple) -> None:
@@ -146,7 +153,7 @@ class TileCutter:
                                  no_data_value, rep_travail_tmp))
             
             # Utiliser multiprocessing pour traiter les dalles
-            with Pool(processes=cpu_count) as pool:
+            with Pool(processes=cpu_count, initializer=TileCutter.init_worker) as pool:
                 results = list(tqdm(pool.imap_unordered(TileCutter.cut_tile, params), 
                                   total=len(params), desc="- Traitement des dalles -"))
 
