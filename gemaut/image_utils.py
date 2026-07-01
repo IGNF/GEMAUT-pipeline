@@ -115,13 +115,9 @@ class RasterProcessor:
     @staticmethod
     def save_raster(data: np.ndarray, file_path: str, profile: dict) -> None:
         """Sauvegarde une image raster"""
-        #print(f"PID={os.getpid()}  handlers={logger._core.handlers}")
-
         try:
             with rasterio.open(file_path, 'w', **profile) as dst:
                 dst.write(data, 1)
-            #logger.debug(f"Image sauvegardée: {file_path}")
-
         except Exception as e:
             logger.error(f"Erreur lors de la sauvegarde de {file_path}: {e}")
             raise
@@ -262,9 +258,10 @@ class MaskProcessor:
     
     @staticmethod
     def set_nodata_extern_to_nodata_intern_mask(mask_path: str, mns_path: str, 
-                                              output_path: str, no_data_ext: float, 
+                                              output_path: str, no_data_ext: float,
+                                              no_data_int: float,
                                               no_data_interne_mask: int) -> None:
-        """Gère les valeurs NoData externes et internes dans le masque"""
+        """Prépare le masque GEMO : bords à 11, trous intérieurs à 255 (sursol)."""
         try:
             with rasterio.open(mask_path) as src_mask, rasterio.open(mns_path) as src_mns:
                 # Vérifier que les dimensions sont identiques
@@ -275,9 +272,9 @@ class MaskProcessor:
                 masque_4gemo = src_mask.read(1)
                 mns_in = src_mns.read(1)
                 
-                # Appliquer la condition pour générer le masque de sortie
-                masque_nodata = np.where(mns_in == no_data_ext, 
-                                       no_data_interne_mask, masque_4gemo).astype(np.uint8)
+                masque_nodata = masque_4gemo.astype(np.uint8)
+                masque_nodata[mns_in == no_data_ext] = no_data_interne_mask
+                masque_nodata[mns_in == no_data_int] = 255
                 
                 # Préparer les métadonnées
                 out_meta = src_mask.meta.copy()

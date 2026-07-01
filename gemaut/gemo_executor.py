@@ -27,6 +27,7 @@ class GEMOExecutor:
     def init_worker():
         """Initialise le worker pour ignorer les signaux d'interruption"""
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        logger.remove()
     
     @staticmethod
     def run_command_without_output(cmd: str) -> int:
