@@ -80,6 +80,20 @@ patch_saga_for_headless_build() {
         sed -i 's/find_package(wxWidgets COMPONENTS html REQUIRED QUIET)/find_package(wxWidgets COMPONENTS core html REQUIRED QUIET)/' \
             "$webservices_cmake"
     fi
+
+    # docs_map / saga_gdi
+    local docs_cmake="${saga_src}/src/tools/docs/CMakeLists.txt"
+    if [ -f "$docs_cmake" ] && grep -q 'add_subdirectory(docs_map)' "$docs_cmake"; then
+        log_info "Patch SAGA: désactivation de docs_map..."
+        sed -i '/add_subdirectory(docs_map)/d' "$docs_cmake"
+    fi
+    # plugin QGIS système
+    local accessories_cmake="${saga_src}/src/accessories/CMakeLists.txt"
+    if [ -f "$accessories_cmake" ] && grep -q 'find_path(INSTALL_QGIS_PLUGIN' "$accessories_cmake"; then
+        log_info "Patch SAGA: désactivation install QGIS..."
+        sed -i '/find_path(INSTALL_QGIS_PLUGIN/,/endif()/s/^/#/' "$accessories_cmake"
+    fi
+
 }
 
 # Installation de SAGA-GIS
@@ -141,6 +155,7 @@ install_saga() {
                -DWITH_GUI=OFF \
                -DWITH_PYTHON=ON \
                -DWITH_TOOLS_OPENCV=OFF \
+	       -DWITH_DEV_TOOLS=OFF \
                ..; then
         log_error "Échec de la configuration CMake"
         exit 1
