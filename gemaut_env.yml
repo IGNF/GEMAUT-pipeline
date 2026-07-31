@@ -3,24 +3,25 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python>=3.8
-  - numpy
-  - scipy
-  - rasterio
-  - gdal
+  # Pins ciblés (séries validées sur l'env de référence)
+  - python=3.14.*
+  - numpy=2.5.*
+  - scipy=1.18.*
+  - rasterio=1.5.*
+  - gdal=3.12.*
+  - libgdal=3.12.*
+  - pdal=2.10.*
+  - python-pdal=3.5.*
+  - wxwidgets=3.3.*
   - tqdm
   - loguru
   - cmake
   - make
   - cxx-compiler
   - git
-  - pdal
-  - python-pdal
-  - wxwidgets
   - proj
   - geos
   - sqlite
-  - libgdal
   - hdf5
   - eigen
   - suitesparse
