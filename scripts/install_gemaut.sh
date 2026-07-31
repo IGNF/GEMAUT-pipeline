@@ -16,6 +16,8 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 CURRENT_DIR=${PWD}
 SAGA_INSTALL_DIR=${SAGA_INSTALL_DIR:-$HOME/GEMAUT/saga_install}
 GEMAUT_INSTALL_DIR=${GEMAUT_INSTALL_DIR:-$HOME/GEMAUT/GEMO}
+# Tag SourceForge figé (évite les cassures sur master / 9.14+)
+SAGA_GIT_REF=${SAGA_GIT_REF:-saga-9.13.0}
 PARALLEL_JOBS=$(nproc)
 
 # Vérification des dépendances
@@ -91,10 +93,11 @@ install_saga() {
         rm -rf saga-gis-code
     fi
     
-    # Cloner SAGA-GIS (version 7.9.0 qui est compatible avec wxWidgets 3.0)
-    log_info "Clonage de SAGA-GIS..."
-    if ! git clone https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
-        log_error "Échec du clonage de SAGA-GIS"
+    # Cloner SAGA-GIS au tag figé (override possible: SAGA_GIT_REF=...)
+    log_info "Clonage de SAGA-GIS ($SAGA_GIT_REF)..."
+    if ! git clone --branch "$SAGA_GIT_REF" --depth 1 \
+        https://git.code.sf.net/p/saga-gis/code saga-gis-code; then
+        log_error "Échec du clonage de SAGA-GIS (réf. $SAGA_GIT_REF)"
         exit 1
     fi
     
@@ -103,6 +106,8 @@ install_saga() {
         log_error "Le répertoire saga-gis-code n'a pas été créé"
         exit 1
     fi
+
+    log_info "SAGA-GIS checkout: $(git -C saga-gis-code rev-parse --short HEAD) ($SAGA_GIT_REF)"
     
     # Compiler SAGA-GIS
     log_info "Compilation de SAGA-GIS..."

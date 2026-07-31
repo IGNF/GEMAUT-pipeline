@@ -13,7 +13,9 @@ elif [ -d "$SAGA_INSTALL_DIR/lib" ]; then
     SAGA_LIB_DIR="$SAGA_INSTALL_DIR/lib"
 else
     echo "[ERROR] Aucun répertoire lib ou lib64 trouvé dans $SAGA_INSTALL_DIR"
-    exit 1
+    echo "[ERROR] Installez SAGA avec ./scripts/install_deps.sh puis réessayez."
+    # return (pas exit) : ce script est sourcé (conda activate / source)
+    return 1 2>/dev/null || exit 1
 fi
 
 # Mettre à jour LD_LIBRARY_PATH (SAGA + wxWidgets conda)
