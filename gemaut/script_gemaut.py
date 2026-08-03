@@ -158,104 +158,88 @@ class GEMAUTPipeline:
         logger.info(config.INFO_MESSAGES['nodata_replacement'])
         image_utils.DataReplacer.replace_nodata_max(
             self.config.temp_files['mns_sans_trou'],
-            self.config.temp_files['mns4saga'],
+            self.config.temp_files['mns_for_mask'],
             self.config.nodata_ext,
             self.config.nodata_max
         )
     
     def _process_mask(self):
-        """Traite le masque (calcul automatique ou utilisation du fichier fourni)"""
-        if self.config.mask_file is None:
-            if self.config.auto_mask_computation:
-                logger.info("Calcul automatique du masque sol/sursol...")
-                output_mask_file = os.path.join(self.config.work_dir, 'MASQUE_compute.tif')
-                
-                # Importer le module de calcul de masque
-                try:
-                    from .mask_computer import MaskComputer
-                    mask_computer = MaskComputer()
-                    
-                    # Obtenir les informations sur les méthodes disponibles
-                    method_info = mask_computer.get_method_info()
-                    logger.info(f"Méthodes disponibles: {', '.join(method_info['available_methods'])}")
-                    
-                    # Calculer le masque avec la méthode choisie
-                    if self.config.mask_method == 'auto':
-                        logger.info("Sélection automatique de la méthode...")
-                    else:
-                        logger.info(f"Utilisation de la méthode: {self.config.mask_method}")
-                    
-                    # Obtenir les paramètres appropriés
-                    if self.config.mask_method in ['auto', 'saga']:
-                        params = self.config.get_saga_params()
-                    elif self.config.mask_method == 'pdal':
-                        params = self.config.get_pdal_params()
-                    else:
-                        raise ValueError(f"Méthode non supportée: {self.config.mask_method}")
-                    
-                    # Calculer le masque
-                    mask_file = mask_computer.compute_mask(
-                        mns_file=self.config.temp_files['mns4saga'],
-                        output_mask_file=output_mask_file,
-                        work_dir=self.config.work_dir,
-                        method=self.config.mask_method,
-                        cpu_count=self.config.cpu_count,
-                        params=params
-                    )
-                    
-                    # Pour SAGA, sauvegarder le masque brut avant correction
-                    if self.config.mask_method == 'saga':
-                        import shutil
-                        mask_brut_saga = os.path.join(self.config.work_dir, 'MASQUE_SAGA_BRUT_avant_correction.tif')
-                        # Sauvegarder AVANT de l'assigner à self.config.mask_file
-                        shutil.copy2(mask_file, mask_brut_saga)
-                        logger.info(f"💾 Masque SAGA brut sauvegardé: {mask_brut_saga}")
-                        logger.info("   Ce fichier contient les différences géographiques originales")
-                        logger.info(f"   Taille du fichier brut: {os.path.getsize(mask_file)} octets")
-                        logger.info(f"   Dimensions et CRS du masque brut conservés")
-                        logger.info(f"   Fichier source: {mask_file}")
-                    
-                    self.config.mask_file = mask_file
-                    logger.info(f"✅ Masque calculé avec succès: {mask_file}")
-                    
-                except ImportError as e:
-                    logger.error(f"Module de calcul automatique non disponible: {e}")
-                    raise RuntimeError(f"Impossible d'importer le module de calcul automatique: {e}")
-                
-                except Exception as e:
-                    logger.error(f"Erreur lors du calcul automatique du masque: {e}")
-                    raise RuntimeError(f"Erreur lors du calcul du masque avec {self.config.mask_method}: {e}")
-                
-            else:
-                logger.info("Calcul automatique désactivé. Veuillez fournir un fichier masque.")
-                raise ValueError("Aucun fichier masque fourni et calcul automatique désactivé")
-            
-            # Vérifier la compatibilité après calcul du masque
-            logger.info("Vérification de la compatibilité après calcul du masque...")
-            try:
-                compatible, details = image_utils.RasterProcessor.validate_raster_compatibility(
-                    self.config.mns_input, 
-                    self.config.mask_file
-                )
-                if not compatible:
-                    logger.warning("⚠️ Différences géographiques détectées dans le masque calculé:")
-                    for issue in details['issues']:
-                        logger.warning(f"  - {issue}")
-                    
-                    # Pour SAGA, on peut être plus tolérant
-                    if self.config.mask_method == 'saga':
-                        logger.info("🔧 Mode SAGA : Continuation malgré les différences géographiques")
-                        logger.info("   Le masque sera rééchantillonné pour correspondre au MNS")
-                    else:
-                        logger.error("❌ INCOMPATIBILITÉ CRITIQUE détectée!")
-                        raise ValueError("Le masque calculé n'est pas compatible avec le MNS")
-                else:
-                    logger.info("✅ Compatibilité validée après calcul du masque")
-            except Exception as e:
-                logger.warning(f"⚠️ Impossible de vérifier la compatibilité: {e}")
-                logger.info("🔧 Continuation avec le masque calculé")
-        else:
+        """Traite le masque : fichier fourni, sinon calcul automatique (pdal/saga)."""
+        if self.config.mask_file is not None:
             logger.info(f"Utilisation du masque fourni: {self.config.mask_file}")
+            return
+
+        logger.info("Aucun masque fourni — calcul automatique du masque sol/sursol...")
+        output_mask_file = os.path.join(self.config.work_dir, 'MASQUE_compute.tif')
+
+        try:
+            from .mask_computer import MaskComputer
+            mask_computer = MaskComputer()
+
+            method_info = mask_computer.get_method_info()
+            logger.info(f"Méthodes disponibles: {', '.join(method_info['available_methods'])}")
+            logger.info(f"Utilisation de la méthode: {self.config.mask_method}")
+
+            if self.config.mask_method == 'saga':
+                params = self.config.get_saga_params()
+            elif self.config.mask_method == 'pdal':
+                params = self.config.get_pdal_params()
+            else:
+                raise ValueError(
+                    f"Méthode non supportée: {self.config.mask_method}. "
+                    "Utilisez 'pdal' ou 'saga'."
+                )
+
+            mask_file = mask_computer.compute_mask(
+                mns_file=self.config.temp_files['mns_for_mask'],
+                output_mask_file=output_mask_file,
+                work_dir=self.config.work_dir,
+                method=self.config.mask_method,
+                cpu_count=self.config.cpu_count,
+                params=params
+            )
+
+            if self.config.mask_method == 'saga':
+                import shutil
+                mask_brut_saga = os.path.join(self.config.work_dir, 'MASQUE_SAGA_BRUT_avant_correction.tif')
+                shutil.copy2(mask_file, mask_brut_saga)
+                logger.info(f"💾 Masque SAGA brut sauvegardé: {mask_brut_saga}")
+
+            self.config.mask_file = mask_file
+            logger.info(f"✅ Masque calculé avec succès: {mask_file}")
+
+        except ImportError as e:
+            logger.error(f"Module de calcul automatique non disponible: {e}")
+            raise RuntimeError(f"Impossible d'importer le module de calcul automatique: {e}")
+        except Exception as e:
+            logger.error(f"Erreur lors du calcul automatique du masque: {e}")
+            raise RuntimeError(f"Erreur lors du calcul du masque avec {self.config.mask_method}: {e}")
+
+        # Vérifier la compatibilité après calcul du masque
+        logger.info("Vérification de la compatibilité après calcul du masque...")
+        try:
+            compatible, details = image_utils.RasterProcessor.validate_raster_compatibility(
+                self.config.mns_input,
+                self.config.mask_file
+            )
+            if not compatible:
+                logger.warning("⚠️ Différences géographiques détectées dans le masque calculé:")
+                for issue in details['issues']:
+                    logger.warning(f"  - {issue}")
+
+                if self.config.mask_method == 'saga':
+                    logger.info("🔧 Mode SAGA : Continuation malgré les différences géographiques")
+                    logger.info("   Le masque sera rééchantillonné pour correspondre au MNS")
+                else:
+                    logger.error("❌ INCOMPATIBILITÉ CRITIQUE détectée!")
+                    raise ValueError("Le masque calculé n'est pas compatible avec le MNS")
+            else:
+                logger.info("✅ Compatibilité validée après calcul du masque")
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.warning(f"⚠️ Impossible de vérifier la compatibilité: {e}")
+            logger.info("🔧 Continuation avec le masque calculé")
     
 
     def _prepare_mask_for_gemo(self):
@@ -424,17 +408,17 @@ Auteur: Nicolas Champion - nicolas.champion@ign.fr""",
    gemaut --config config.yaml
 
 2. Avec arguments de ligne de commande:
-   gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--auto-mask] [--mask-method saga|pdal|auto] [--clean]
+   gemaut --mns /chem/vers/MNS_in.tif --out /chem/vers/MNT.tif --reso 4 --cpu 24 --RepTra /chem/vers/RepTra [--sigma 0.5] [--regul 0.01] [--tile 300] [--pad 120] [--norme hubertukey] [--nodata_ext -32768] [--nodata_int -32767] [--init /chem/vers/MNS_in.tif] [--masque /chem/vers/MASQUE_GEMO.tif] [--groundval 0] [--mask-method saga|pdal] [--clean]
 
 3. Créer un template de configuration:
    gemaut --create-config config.yaml
 
-4. Calcul automatique de masque:
-   # Avec SAGA (méthode traditionnelle)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga --auto-mask
+4. Calcul automatique de masque (si --masque n'est pas fourni):
+   # Avec PDAL (défaut, algorithme CSF)
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal
    
-   # Avec PDAL (plus rapide, algorithme CSF)
-   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method pdal --auto-mask
+   # Avec SAGA
+   gemaut --mns MNS.tif --out MNT.tif --reso 4 --cpu 24 --RepTra /tmp --mask-method saga
 
 IMPORTANT: Le MNS doit avoir des valeurs de no_data différentes pour les bords de chantier [no_data_ext] et les trous à l'intérieur du chantier [no_data_int] là où la corrélation a échoué par exemple
     
@@ -463,12 +447,10 @@ Any Questions, please contact me at nicolas.champion@ign.fr
     parser.add_argument("--groundval", default=0, type=int, help="valeur de masque pour le SOL")
     parser.add_argument("--init", type=str, help="initialisation [par défaut le MNS]")
     
-    # Options de calcul automatique de masque
-    parser.add_argument("--auto-mask", action='store_true', default=config.DEFAULT_MASK_COMPUTATION, 
-                       help="calculer automatiquement le masque (défaut: activé)")
+    # Méthode de calcul du masque si --masque n'est pas fourni
     parser.add_argument("--mask-method", choices=config.MASK_COMPUTATION_METHODS, 
                        default=config.DEFAULT_MASK_METHOD,
-                       help=f"méthode de calcul du masque: {', '.join(config.MASK_COMPUTATION_METHODS)} (défaut: {config.DEFAULT_MASK_METHOD})")
+                       help=f"méthode de calcul du masque si --masque absent: {', '.join(config.MASK_COMPUTATION_METHODS)} (défaut: {config.DEFAULT_MASK_METHOD})")
     
     parser.add_argument("--nodata_ext", type=int, default=config.DEFAULT_NODATA_EXT, help="Valeur du no_data sur les bords")
     parser.add_argument("--nodata_int", type=int, default=config.DEFAULT_NODATA_INT, help="Valeur du no_data pour les trous")
@@ -527,7 +509,6 @@ def main():
                 mask_file=args.masque,
                 ground_value=args.groundval,
                 init_file=args.init,
-                auto_mask_computation=args.auto_mask,
                 mask_method=args.mask_method,
                 nodata_ext=args.nodata_ext,
                 nodata_int=args.nodata_int,

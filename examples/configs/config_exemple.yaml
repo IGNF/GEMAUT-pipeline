@@ -26,7 +26,6 @@ saga:
   tile: 100
   pente: 15
 mask_computation:
-  auto_computation: true
   method: pdal
 pdal:
   csf:

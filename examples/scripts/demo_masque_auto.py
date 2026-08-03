@@ -54,11 +54,10 @@ def demo_configuration():
     
     try:
         from gemaut_config import GEMAUTConfig
-        from config import DEFAULT_MASK_COMPUTATION, DEFAULT_MASK_METHOD
+        from config import DEFAULT_MASK_METHOD
         
         logger.info(f"📋 Configuration par défaut:")
-        logger.info(f"   Calcul automatique: {DEFAULT_MASK_COMPUTATION}")
-        logger.info(f"   Méthode: {DEFAULT_MASK_METHOD}")
+        logger.info(f"   Méthode (si pas de mask_file): {DEFAULT_MASK_METHOD}")
         
         # Créer une configuration de test
         config = GEMAUTConfig(
@@ -67,12 +66,11 @@ def demo_configuration():
             resolution=4.0,
             cpu_count=4,
             work_dir="/tmp/test_work",
-            auto_mask_computation=True,
             mask_method="pdal"
         )
         
         logger.info(f"✅ Configuration créée avec succès:")
-        logger.info(f"   Calcul automatique: {config.auto_mask_computation}")
+        logger.info(f"   Masque fourni: {config.mask_file}")
         logger.info(f"   Méthode: {config.mask_method}")
         
         # Tester les paramètres
@@ -96,19 +94,16 @@ def demo_command_line():
     try:
         from script_gemaut import parse_arguments
         
-        logger.info("✅ Nouvelles options disponibles:")
-        logger.info("   --auto-mask: Activer le calcul automatique")
-        logger.info("   --mask-method: Choisir la méthode (auto/saga/pdal)")
+        logger.info("✅ Options masque disponibles:")
+        logger.info("   --masque: Fichier masque fourni (sinon calcul auto)")
+        logger.info("   --mask-method: Méthode si pas de --masque (pdal/saga)")
         
         logger.info("\n📝 Exemples d'utilisation:")
-        logger.info("   # Calcul automatique avec PDAL")
+        logger.info("   # Calcul automatique avec PDAL (défaut)")
         logger.info("   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 4 --RepTra /tmp --mask-method pdal")
         
         logger.info("   # Calcul automatique avec SAGA")
         logger.info("   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 4 --RepTra /tmp --mask-method saga")
-        
-        logger.info("   # Choix automatique (recommandé)")
-        logger.info("   python script_gemaut.py --mns MNS.tif --out MNT.tif --reso 4 --cpu 4 --RepTra /tmp --mask-method auto")
         
         return True
         
@@ -206,7 +201,7 @@ def main():
     if passed == total:
         logger.info("\n🎉 Toutes les démonstrations sont passées!")
         logger.info("\n💡 Votre intégration est prête à l'emploi:")
-        logger.info("   1. Testez avec --mask-method auto")
+        logger.info("   1. Testez avec --mask-method pdal (défaut)")
         logger.info("   2. Comparez SAGA vs PDAL")
         logger.info("   3. Optimisez selon vos besoins")
         

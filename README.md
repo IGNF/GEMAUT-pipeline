@@ -17,7 +17,7 @@ Si vous utilisez GEMAUT dans vos travaux, merci de citer cette publication.
 
 ## ✨ Nouvelles fonctionnalités
 
-- **⚙️ Calcul automatique de masques** avec `--auto-mask`
+- **⚙️ Calcul automatique de masques** si `--masque` / `mask_file` n'est pas fourni
 - **🎯 Choix de méthode** : PDAL (par défaut) ou SAGA avec `--mask-method`
 - **📋 Configuration simplifiée** : Utilisation d'un fichier de configuration YAML
 - **🧪 Tests unitaires complets** : Suite de tests automatisés pour validation
@@ -93,9 +93,8 @@ gemaut \
     --out /chemin/vers/MNT.tif \
     --reso 4 \
     --cpu 24 \
-    --RepTra RepTra \
-    --auto-mask
-    # PDAL est utilisé par défaut (pas besoin de --mask-method pdal)
+    --RepTra RepTra
+    # Pas de --masque → calcul auto (PDAL par défaut)
 ```
 
 #### **Calcul automatique de masque avec SAGA**
@@ -106,7 +105,6 @@ gemaut \
     --reso 4 \
     --cpu 24 \
     --RepTra RepTra_SAGA \
-    --auto-mask \
     --mask-method saga
 ```
 
@@ -140,12 +138,11 @@ gemaut \
 - `--cpu` : Nombre de CPUs à utiliser
 - `--RepTra` : Répertoire de travail
 
-### **Nouveaux paramètres de masque automatique**
-- `--auto-mask` : Activer le calcul automatique de masque
-- `--mask-method` : Méthode de calcul (`saga`, `pdal`, ou `auto`=`saga` si disponible)
+### Paramètres de masque
+- `--masque` : Masque sol/sursol fourni (si absent → calcul automatique)
+- `--mask-method` : Méthode de calcul si pas de `--masque` (`pdal` par défaut, ou `saga`)
 
 ### Paramètres optionnels
-- `--masque` : Masque sol/sursol (ignoré si `--auto-mask` est activé)
 - `--groundval` : Valeur du masque pour le sol (défaut: 0)
 - `--init` : Initialisation (par défaut le MNS)
 - `--nodata_ext` : Valeur du no_data sur les bords de chantier (défaut: -32768)

@@ -76,7 +76,7 @@ class MaskComputer:
         return methods
     
     def compute_mask(self, mns_file: str, output_mask_file: str, 
-                    work_dir: str, method: str = 'auto',
+                    work_dir: str, method: str = 'pdal',
                     cpu_count: int = 4, params: Optional[Dict] = None) -> str:
         """
         Calcule un masque sol/sursol avec la méthode spécifiée
@@ -85,7 +85,7 @@ class MaskComputer:
             mns_file: Fichier MNS d'entrée
             output_mask_file: Fichier de sortie du masque
             work_dir: Répertoire de travail
-            method: Méthode à utiliser ('saga', 'pdal', ou 'auto')
+            method: Méthode à utiliser ('saga' ou 'pdal')
             cpu_count: Nombre de CPUs à utiliser
             params: Paramètres spécifiques à la méthode
             
@@ -229,7 +229,7 @@ class MaskComputer:
 
 # Fonction utilitaire pour utilisation directe
 def compute_mask_auto(mns_file: str, output_mask_file: str, work_dir: str, 
-                     method: str = 'auto', cpu_count: int = 4, 
+                     method: str = 'pdal', cpu_count: int = 4, 
                      params: Optional[Dict] = None) -> str:
     """
     Fonction utilitaire pour calculer un masque automatiquement
@@ -238,7 +238,7 @@ def compute_mask_auto(mns_file: str, output_mask_file: str, work_dir: str,
         mns_file: Fichier MNS d'entrée
         output_mask_file: Fichier de sortie du masque
         work_dir: Répertoire de travail
-        method: Méthode à utiliser ('saga', 'pdal', ou 'auto')
+        method: Méthode à utiliser ('saga' ou 'pdal')
         cpu_count: Nombre de CPUs à utiliser
         params: Paramètres spécifiques à la méthode
         

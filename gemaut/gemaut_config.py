@@ -42,8 +42,7 @@ class GEMAUTConfig:
     tile_saga: int = config.TILE_SAGA
     pente_saga: int = config.PENTE_SAGA
     
-    # Paramètres de calcul automatique de masque
-    auto_mask_computation: bool = config.DEFAULT_MASK_COMPUTATION
+    # Méthode de calcul du masque si mask_file est absent
     mask_method: str = config.DEFAULT_MASK_METHOD
     
     # Paramètres internes
@@ -56,8 +55,24 @@ class GEMAUTConfig:
     
     def __post_init__(self):
         """Validation et initialisation post-création"""
+        self._normalize_paths()
         self._validate_inputs()
         self._setup_paths()
+
+    @staticmethod
+    def _expand_path(path: Optional[str]) -> Optional[str]:
+        """Développe ~ et convertit en chemin absolu (None/'' inchangés)."""
+        if not path:
+            return path
+        return os.path.abspath(os.path.expanduser(path))
+
+    def _normalize_paths(self):
+        """Normalise les chemins utilisateur (YAML ou CLI) avant validation."""
+        self.mns_input = self._expand_path(self.mns_input)
+        self.mnt_output = self._expand_path(self.mnt_output)
+        self.work_dir = self._expand_path(self.work_dir)
+        self.mask_file = self._expand_path(self.mask_file)
+        self.init_file = self._expand_path(self.init_file)
     
     def _validate_inputs(self):
         """Valide les paramètres d'entrée"""
@@ -84,7 +99,7 @@ class GEMAUTConfig:
         # Chemins des fichiers temporaires
         self.temp_files = {
             'mns_sans_trou': os.path.join(self.tmp_dir, config.TEMP_FILES['mns_sans_trou']),
-            'mns4saga': os.path.join(self.tmp_dir, config.TEMP_FILES['mns4saga']),
+            'mns_for_mask': os.path.join(self.tmp_dir, config.TEMP_FILES['mns_for_mask']),
             'mns_sous_ech': os.path.join(self.tmp_dir, config.TEMP_FILES['mns_sous_ech']),
             'masque_4gemo': os.path.join(self.tmp_dir, config.TEMP_FILES['masque_4gemo']),
             'masque_nodata': os.path.join(self.tmp_dir, config.TEMP_FILES['masque_nodata']),

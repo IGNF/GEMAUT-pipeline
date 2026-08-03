@@ -24,10 +24,9 @@ RADIUS_SAGA = 100
 TILE_SAGA = 100
 PENTE_SAGA = 15
 
-# Paramètres de calcul automatique de masque
+# Paramètres de calcul automatique de masque (si aucun mask_file fourni)
 MASK_COMPUTATION_METHODS = ['saga', 'pdal']
 DEFAULT_MASK_METHOD = 'pdal'
-DEFAULT_MASK_COMPUTATION = True  # Calcul automatique par défaut
 
 # Paramètres PDAL pour le calcul de masque
 PDAL_CSF_MAX_ITERATIONS = 500
@@ -57,7 +56,7 @@ FILE_EXTENSIONS = {
 # Noms de fichiers temporaires
 TEMP_FILES = {
     'mns_sans_trou': 'MNS_sans_trou.tif',
-    'mns4saga': 'MNS4SAGA_nodata_max.tif',
+    'mns_for_mask': 'MNS_for_mask_nodata_max.tif',
     'mns_sous_ech': 'MNS_SousEch_tmp.tif',
     'masque_4gemo': 'MASQUE_4gemo.tif',
     'masque_nodata': 'MASQUE_nodata.tif',

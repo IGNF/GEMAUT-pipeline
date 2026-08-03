@@ -51,9 +51,8 @@ class GEMAUTConfigFromFile:
     saga_tile: int = 100
     saga_pente: int = 15
     
-    # Paramètres de calcul automatique de masque
-    auto_mask_computation: bool = True
-    mask_method: str = 'auto'
+    # Méthode de calcul du masque si mask_file est absent
+    mask_method: str = 'pdal'
 
 
 class ConfigManager:
@@ -112,9 +111,8 @@ class ConfigManager:
                 saga_tile=saga_data.get('tile', 100),
                 saga_pente=saga_data.get('pente', 15),
                 
-                # Paramètres de calcul automatique de masque
-                auto_mask_computation=mask_computation_data.get('auto_computation', True),
-                mask_method=mask_computation_data.get('method', 'auto')
+                # Méthode de calcul du masque si mask_file est absent
+                mask_method=mask_computation_data.get('method', 'pdal')
             )
             
         except FileNotFoundError:
@@ -166,8 +164,7 @@ class ConfigManager:
                 'pente': 15
             },
             'mask_computation': {
-                'auto_computation': True,
-                'method': 'auto'
+                'method': 'pdal'
             },
             'pdal': {
                 'csf': {
@@ -192,9 +189,23 @@ class ConfigManager:
             raise
     
     @staticmethod
+    def _expand_path(path: Optional[str]) -> Optional[str]:
+        """Développe ~ et convertit en chemin absolu (None/'' inchangés)."""
+        if not path:
+            return path
+        return os.path.abspath(os.path.expanduser(path))
+
+    @staticmethod
     def validate_config(config: GEMAUTConfigFromFile) -> None:
         """Valide la configuration chargée"""
         errors = []
+
+        # Normaliser les chemins avant les contrôles d'existence
+        config.mns_file = ConfigManager._expand_path(config.mns_file)
+        config.output_file = ConfigManager._expand_path(config.output_file)
+        config.work_dir = ConfigManager._expand_path(config.work_dir)
+        config.mask_file = ConfigManager._expand_path(config.mask_file)
+        config.init_file = ConfigManager._expand_path(config.init_file)
         
         # Vérifier les fichiers obligatoires
         if not config.mns_file:
@@ -252,8 +263,7 @@ class ConfigManager:
             mask_file=config.mask_file,
             ground_value=config.ground_value,
             init_file=config.init_file,
-            auto_mask_computation=getattr(config, 'auto_mask_computation', True),
-            mask_method=getattr(config, 'mask_method', 'auto'),
+            mask_method=getattr(config, 'mask_method', 'pdal'),
             nodata_ext=config.nodata_ext,
             nodata_int=config.nodata_int,
             sigma=config.sigma,
