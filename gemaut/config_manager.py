@@ -140,6 +140,7 @@ class ConfigManager:
                 'resolution': 4.0,
                 'cpu_count': 8,
                 'clean_temp': False,
+                # true = DEBUG sur la console (INFO/ERROR toujours affichés)
                 'verbose': False
             },
             'gemo': {

@@ -143,7 +143,7 @@ class HoleFiller:
                 valid_values = mns[valid_indices[:, 0], valid_indices[:, 1]]
                 
                 if hole_indices.size == 0:
-                    logger.info("Aucun trou détecté, aucune interpolation nécessaire.")
+                    logger.debug("Aucun trou détecté, aucune interpolation nécessaire.")
                     mns_filled = mns.copy()
                 else:
                     # Utiliser LinearNDInterpolator
@@ -182,7 +182,7 @@ class HoleFiller:
                 hole_indices = np.argwhere(mask_invalid)
                 
                 if hole_indices.size == 0:
-                    logger.info("Aucun trou détecté.")
+                    logger.debug("Aucun trou détecté.")
                     mns_filled = mns.copy()
                 else:
                     # Extraire les valeurs des pixels valides

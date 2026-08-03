@@ -373,5 +373,5 @@ class TileAssembler:
             with rasterio.open(chem_mnt_out, 'w', **profile) as dst:
                 dst.write(mosaic_final, 1)
             
-            logger.info(f"Mosaïque finale sauvegardée sous {chem_mnt_out}")
+            logger.debug(f"Mosaïque finale sauvegardée sous {chem_mnt_out}")
             pbar.update(pbar.total - pbar.n) 

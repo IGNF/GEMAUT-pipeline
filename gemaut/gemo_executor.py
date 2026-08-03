@@ -97,7 +97,7 @@ class GEMOExecutor:
             for y in range(nbre_dalle_y):
                 tasks.append((x, y, rep_travail_tmp, gemo_params))
         
-        logger.info(f"Lancement de GEMO sur {len(tasks)} tuiles avec {cpu_count} CPUs")
+        logger.debug(f"Lancement de GEMO sur {len(tasks)} tuiles avec {cpu_count} CPUs")
         
         # Exécuter en parallèle
         with Pool(processes=cpu_count, initializer=GEMOExecutor.init_worker) as pool:
@@ -111,7 +111,10 @@ class GEMOExecutor:
         success_count = sum(1 for result in results if "succès" in result)
         error_count = len(results) - success_count
         
-        logger.info(f"Traitement GEMO terminé: {success_count} succès, {error_count} erreurs")
+        if error_count:
+            logger.warning(f"GEMO terminé: {success_count} succès, {error_count} erreurs")
+        else:
+            logger.debug(f"GEMO terminé: {success_count} succès, {error_count} erreurs")
         
         # Afficher les erreurs si il y en a
         if error_count > 0:
@@ -129,7 +132,7 @@ class GDALProcessor:
         """Exécute une commande GDAL"""
         try:
             if description:
-                logger.info(f"{description}: {cmd}")
+                logger.debug(f"{description}: {cmd}")
             
             result = subprocess.run(cmd, shell=True, 
                                   stdout=subprocess.DEVNULL, 

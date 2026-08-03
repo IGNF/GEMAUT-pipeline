@@ -37,7 +37,7 @@ class MaskComputer:
     def __init__(self):
         """Initialise le calculateur de masques"""
         self.available_methods = self._check_available_methods()
-        logger.info(f"Méthodes disponibles: {', '.join(self.available_methods)}")
+        logger.debug(f"Méthodes disponibles: {', '.join(self.available_methods)}")
     
     def _check_available_methods(self) -> list:
         """Vérifie quelles méthodes sont disponibles"""
@@ -48,7 +48,7 @@ class MaskComputer:
                 saga_instance = SAGAIntegration()
                 if saga_instance.validate_saga_installation():
                     methods.append('saga')
-                    logger.info("✅ SAGA disponible et fonctionnel")
+                    logger.debug("SAGA disponible et fonctionnel")
                 else:
                     logger.warning("⚠️ SAGA détecté mais non fonctionnel")
             except Exception as e:
@@ -61,7 +61,7 @@ class MaskComputer:
                 pdal_instance = PDALIntegration()
                 if pdal_instance._check_pdal_available():
                     methods.append('pdal')
-                    logger.info("✅ PDAL disponible et fonctionnel")
+                    logger.debug("PDAL disponible et fonctionnel")
                 else:
                     logger.warning("⚠️ PDAL détecté mais non fonctionnel")
             except Exception as e:
@@ -107,10 +107,10 @@ class MaskComputer:
         if params is None:
             params = self._get_default_params(method)
         
-        logger.info(f"🚀 Calcul du masque avec {method.upper()}")
-        logger.info(f"📁 MNS: {mns_file}")
-        logger.info(f"📁 Sortie: {output_mask_file}")
-        logger.info(f"⚙️ Paramètres: {params}")
+        logger.debug(f"Calcul du masque avec {method.upper()}")
+        logger.debug(f"MNS: {mns_file}")
+        logger.debug(f"Sortie: {output_mask_file}")
+        logger.debug(f"Paramètres: {params}")
         
         start_time = time.time()
         
@@ -123,8 +123,8 @@ class MaskComputer:
                 raise ValueError(f"Méthode non supportée: {method}")
             
             execution_time = time.time() - start_time
-            logger.info(f"✅ Masque calculé avec succès en {execution_time:.2f}s")
-            logger.info(f"📁 Fichier généré: {mask_file}")
+            logger.debug(f"Masque calculé en {execution_time:.2f}s")
+            logger.debug(f"Fichier généré: {mask_file}")
             
             return mask_file
             
@@ -164,7 +164,7 @@ class MaskComputer:
     def _compute_with_saga(self, mns_file: str, output_mask_file: str, 
                           work_dir: str, cpu_count: int, params: Dict) -> str:
         """Calcule le masque avec SAGA"""
-        logger.info("🔧 Utilisation de SAGA pour l'extraction...")
+        logger.debug("Utilisation de SAGA pour l'extraction...")
         
         # Créer le répertoire de sortie si nécessaire
         os.makedirs(os.path.dirname(output_mask_file), exist_ok=True)
@@ -183,7 +183,7 @@ class MaskComputer:
     def _compute_with_pdal(self, mns_file: str, output_mask_file: str, 
                           work_dir: str, cpu_count: int, params: Dict) -> str:
         """Calcule le masque avec PDAL"""
-        logger.info("🔧 Utilisation de PDAL pour l'extraction...")
+        logger.debug("Utilisation de PDAL pour l'extraction...")
         
         pdal_instance = PDALIntegration()
         

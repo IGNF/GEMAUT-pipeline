@@ -31,14 +31,14 @@ class SAGAIntegration:
             saga_params: Paramètres SAGA (radius, tile, no_data_max, pente)
         """
         try:
-            logger.info("Calcul automatique du masque avec SAGA")
+            logger.debug("Calcul automatique du masque avec SAGA")
             
             # Vérifier si le fichier de sortie existe déjà
             if os.path.isfile(output_mask_file):
                 os.remove(output_mask_file)
-                logger.info(f"Fichier {output_mask_file} supprimé: il va être recalculé")
+                logger.debug(f"Fichier {output_mask_file} supprimé: il va être recalculé")
             else:
-                logger.info(f"Fichier {output_mask_file} n'existe pas: il va être recalculé")
+                logger.debug(f"Fichier {output_mask_file} n'existe pas: il va être recalculé")
             
             # Appeler le script SAGA
             main_saga_ground_extraction(
@@ -52,7 +52,7 @@ class SAGAIntegration:
                 saga_params['pente']
             )
             
-            logger.info(f"Masque SAGA calculé avec succès: {output_mask_file}")
+            logger.debug(f"Masque SAGA calculé avec succès: {output_mask_file}")
             
         except subprocess.CalledProcessError as e:
             logger.error(f"Erreur lors de l'exécution du script SAGA: {e}")
@@ -69,7 +69,7 @@ class SAGAIntegration:
             result = subprocess.run(['saga_cmd', '--version'], 
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                logger.info("SAGA détecté et fonctionnel")
+                logger.debug("SAGA détecté et fonctionnel")
                 return True
             else:
                 logger.warning("SAGA détecté mais retourne un code d'erreur")
@@ -135,24 +135,24 @@ class SAGAIntegration:
     @staticmethod
     def log_saga_environment() -> None:
         """Enregistre les informations sur l'environnement SAGA"""
-        logger.info("=== Informations environnement SAGA ===")
+        logger.debug("=== Informations environnement SAGA ===")
         
         # Version SAGA
         saga_version = SAGAIntegration.get_saga_version()
-        logger.info(f"SAGA version: {saga_version}")
+        logger.debug(f"SAGA version: {saga_version}")
         
         # Dépendances
         dependencies = SAGAIntegration.check_saga_dependencies()
-        logger.info("Dépendances SAGA:")
+        logger.debug("Dépendances SAGA:")
         for dep, available in dependencies.items():
             status = "✓" if available else "✗"
-            logger.info(f"  {status} {dep}")
+            logger.debug(f"  {status} {dep}")
         
         # Variables d'environnement importantes
         env_vars = ['SAGA_MLB', 'SAGA_TLB', 'GDAL_DATA', 'PROJ_LIB']
-        logger.info("Variables d'environnement:")
+        logger.debug("Variables d'environnement:")
         for var in env_vars:
             value = os.environ.get(var, "Non définie")
-            logger.info(f"  {var}: {value}")
+            logger.debug(f"  {var}: {value}")
         
-        logger.info("========================================") 
+        logger.debug("========================================") 

@@ -24,6 +24,14 @@ os.environ['OMP_NUM_THREADS'] = '1'
 #chem_exe_saga="/home/nchampion/DEV/SAGA/saga-9.5.1/saga-gis/build/src/saga_core/saga_cmd/saga_cmd"
 chem_exe_saga="saga_cmd"
 
+####################################################################################################
+def reset_dir(path: str) -> None:
+    """Supprime et recrée un répertoire (évite de réutiliser d'anciennes dalles SAGA)."""
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    os.makedirs(path, exist_ok=True)
+    logger.debug(f"[SAGA] Répertoire réinitialisé: {path}")
+
 #################################################################################################### 
 def init_worker():
 	signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -93,7 +101,7 @@ def run_saga_par_dalle_parallel_avec_carte_pentes(RepIN,RepOUT,chem_pente_par_da
                 # cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente_local} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE 15 -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 tasks.append(cmd_saga_1_dalle)
-                logger.info(f"{cmd_saga_1_dalle}")
+                logger.debug(f"{cmd_saga_1_dalle}")
             else:
                 #on copie directement la dalle MNS no_data dans le ground.tif, ça sert juste pour l'assemblage plus tard [implémentation très sale]
                 shutil.copyfile(chem_img, chem_ground_tif) 
@@ -124,9 +132,9 @@ def run_saga_par_dalle_parallel(RepIN,RepOUT,rayon,no_data,pente,iNbreCPU):
             if contient_donnees(chem_img, no_data):
                 # cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente_local} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
                 cmd_saga_1_dalle=f"{chem_exe_saga} grid_filter 7 -INPUT {chem_img} -RADIUS {rayon} -TERRAINSLOPE {pente} -GROUND {chem_ground} -NONGROUND {chem_non_ground} > /dev/null 2>&1 "
-                logger.info(f"{cmd_saga_1_dalle}")
+                logger.debug(f"{cmd_saga_1_dalle}")
                 tasks.append(cmd_saga_1_dalle)
-                logger.info(f"cmd_saga_1_dalle {cmd_saga_1_dalle}")
+                logger.debug(f"cmd_saga_1_dalle {cmd_saga_1_dalle}")
             else:
                 #on copie directement la dalle MNS no_data dans le ground.tif, ça sert juste pour l'assemblage plus tard [implémentation très sale]
                 shutil.copyfile(chem_img, chem_ground_tif) 
@@ -234,14 +242,14 @@ def generate_slope_raster(chem_mns, chem_pente):
             "-scale", str(scale_factor),
             chem_mns, chem_pente
         ]
-        logger.info(f"Running gdaldem command with scale factor: {' '.join(cmd)}")
+        logger.debug(f"Running gdaldem command with scale factor: {' '.join(cmd)}")
     else:
         # For projected coordinate systems, no scale parameter is needed
         cmd = [
             "gdaldem", "slope", "-alg", "ZevenbergenThorne",
             chem_mns, chem_pente
         ]
-        logger.info(f"Running gdaldem command without scale factor: {' '.join(cmd)}")
+        logger.debug(f"Running gdaldem command without scale factor: {' '.join(cmd)}")
     
     # Execute the command
     subprocess.run(cmd, check=True)
@@ -352,7 +360,7 @@ def Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, nom_g
 ################################################################################################################################
 def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_data_ext):
     # Ouvrir l'image en mode lecture
-    logger.info(f"[SAGA] Creer_image_binaire de : {chem_out_final_expand_tmp} en {chem_out_final_expand}")
+    logger.debug(f"[SAGA] Creer_image_binaire de : {chem_out_final_expand_tmp} en {chem_out_final_expand}")
     with rasterio.open(chem_out_final_expand_tmp) as src:
         # Lire les métadonnées et les données de l'image
         profile = src.profile
@@ -373,7 +381,7 @@ def Creer_image_binaire(chem_out_final_expand_tmp, chem_out_final_expand, no_dat
         with rasterio.open(chem_out_final_expand, 'w', **profile) as dst:
             dst.write(binary_data, 1)
 
-    logger.info(f"[SAGA] Creer_image_binaire OK")
+    logger.debug(f"[SAGA] Creer_image_binaire OK")
                     
 ############################################################################################################
 def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,iNbreCPU):
@@ -390,8 +398,8 @@ def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,
     max_col = max(dirs_col)
     max_lig = max(dirs_lig)
     #
-    logger.info(f"[RABOUTAGE PAR LIGNE] max_col : {max_col}")
-    logger.info(f"[RABOUTAGE PAR LIGNE] max_lig : {max_lig}")
+    logger.debug(f"[RABOUTAGE PAR LIGNE] max_col : {max_col}")
+    logger.debug(f"[RABOUTAGE PAR LIGNE] max_lig : {max_lig}")
     tasks = []
     #
     for col in range(max_col):
@@ -405,7 +413,7 @@ def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,
             folder_number_lig = f"{lig+1}"                
             folder_name=f"DALLAGE_{folder_number_col}_{folder_number_lig}"
             #
-            logger.info(f"recherche dans >> {os.path.join(RepTra_DALLAGE_SAGA_in,folder_name)}")
+            logger.debug(f"recherche dans >> {os.path.join(RepTra_DALLAGE_SAGA_in,folder_name)}")
             #
             for root, dirs, files in os.walk(os.path.join(RepTra_DALLAGE_SAGA_in,folder_name)):
                 for file in files:
@@ -415,7 +423,7 @@ def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,
         #rajouter un dossier de travail     
         output_file = os.path.join(RepTra_raboutage_tmp,f"out_{col+1}.tif")  
         cmd = f"gdal_merge.py -n -99999 -a_nodata -99999  -o {output_file} {' '.join(liste_files)} "
-        logger.info(f"[RABOUTAGE PAR LIGNE] : {cmd}")
+        logger.debug(f"[RABOUTAGE PAR LIGNE] : {cmd}")
         #cmd = f"gdal_merge.py -n -99999 -a_nodata -99999  -o {output_file} {' '.join(liste_files)} > /dev/null 2>&1 "
         tasks.append(cmd)
 
@@ -427,7 +435,7 @@ def Raboutage_DALLAGE_SAGA(RepTra_DALLAGE_SAGA_in,RepTra_raboutage_tmp,chem_out,
         
     tif_files = ' '.join([os.path.join(RepTra_raboutage_tmp,f'out_{col+1}.tif') for col in range(max_col)])
     cmd = f"gdal_merge.py -n -99999 -a_nodata -99999  -o {chem_out} {tif_files} > /dev/null 2>&1 "
-    logger.info(f"[RABOUTAGE FINAL] : {cmd}")
+    logger.debug(f"[RABOUTAGE FINAL] : {cmd}")
     os.system(cmd)
     
 ####################################################################################################
@@ -461,19 +469,25 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
     
     try:
 
-        logger.info("[SAGA] Démarrage de main_saga_ground_extraction")
+        logger.debug("[SAGA] Démarrage de main_saga_ground_extraction")
 
         # Enregistrer l'heure de départ
         start_time = time.time()
         start_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(start_time))
-        logger.info(f"[SAGA] Programme démarré à : {start_time_str}")
+        logger.debug(f"[SAGA] Programme démarré à : {start_time_str}")
         
         # parametres du programme
-        logger.info(f"[SAGA] PARAMETRAGE: mns={chem_mns}, out={chem_out_final}, RepTra={RepTra}, rayon={rayon}, taille_dallage={taille_dallage}, cpu={iNbreCPU}")        
+        logger.debug(f"[SAGA] PARAMETRAGE: mns={chem_mns}, out={chem_out_final}, RepTra={RepTra}, rayon={rayon}, taille_dallage={taille_dallage}, cpu={iNbreCPU}")        
         
         RepTra_tmp=os.path.join(RepTra,"tmp")
         if not os.path.isdir(RepTra): os.mkdir(RepTra)
         if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
+
+        # Éviter de réutiliser d'anciennes dalles (ex. run L puis S dans le même RepTra)
+        RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
+        RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
+        reset_dir(RepTra_DALLAGE_tmp)
+        reset_dir(RepTra_OUT_SAGA_tmp)
 
         #
         chem_pente_filtree=os.path.join(RepTra_tmp,'pente_filtree.tif')
@@ -481,32 +495,26 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
 
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Calcule de la carte des pentes & filtre - Durée d'exécution : {duration_tmp:.2f} secondes")        
+        logger.debug(f"FIN Calcule de la carte des pentes & filtre - Durée d'exécution : {duration_tmp:.2f} secondes")        
         #
         chem_pente_par_dallle=os.path.join(RepTra_tmp,'pente_par_dallle.tif')
         Daller_pente(chem_pente_filtree,chem_pente_par_dallle, taille_dallage)
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Dallage des Pentes - Durée d'exécution : {duration_tmp:.2f} secondes") 
+        logger.debug(f"FIN Dallage des Pentes - Durée d'exécution : {duration_tmp:.2f} secondes") 
 
         #
-        RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
-        if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
-        
-        #
-        logger.info(f"BEGIN Dallage du Chantier avec rasterio")
+        logger.debug(f"BEGIN Dallage du Chantier avec rasterio")
         Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, 'DALLAGE_')
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes")         
+        logger.debug(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes")         
 
         #
-        RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
-        if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
         run_saga_par_dalle_parallel_avec_carte_pentes(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,chem_pente_par_dallle,taille_dallage,rayon,no_data_ext,iNbreCPU)
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
 
         RepTra_OUT_SAGA_tmp_expand = os.path.expanduser(RepTra_OUT_SAGA_tmp)
         chem_out_final_tmp=os.path.join(RepTra_tmp,'out_final_tmp.tif')
@@ -521,7 +529,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
                     chem_out = f"{chem_in[:-5]}.tif"
                     cmd = f"gdal_translate {chem_in} {chem_out}"
                     tasks_gdal.append(cmd)
-                    logger.info(cmd)
+                    logger.debug(cmd)
         
         # Utiliser le Pool de multiprocessing
         # Utiliser imap_unordered pour traiter les commandes en parallèle
@@ -530,7 +538,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
 
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Conversion des .sdat de SAGA en .tif en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"FIN Conversion des .sdat de SAGA en .tif en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
 
         RepTra_raboutage_tmp=os.path.join(RepTra_OUT_SAGA_tmp,'RABOUTAGE_tmp')
 
@@ -540,7 +548,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
         else:
             shutil.rmtree(RepTra_raboutage_tmp)
             os.mkdir(RepTra_raboutage_tmp)
-        logger.info(f"RepTra_raboutage_tmp : {RepTra_raboutage_tmp}")
+        logger.debug(f"RepTra_raboutage_tmp : {RepTra_raboutage_tmp}")
 
         RepTra_raboutage_tmp_expand=  os.path.expanduser(RepTra_raboutage_tmp)
 
@@ -552,7 +560,7 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
         
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
         #print(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
         #
         chem_out_final_expand  = os.path.expanduser(chem_out_final)
@@ -563,9 +571,9 @@ def main_saga_ground_extraction_avec_carte_pentes(chem_mns, chem_out_final, RepT
         end_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(end_time))
         # Calculer la durée
         duration = end_time - start_time
-        logger.info(f"[SAGA] END - Programme terminé à : {end_time_str} - Durée d'exécution : {duration:.2f} secondes")
+        logger.debug(f"[SAGA] END - Programme terminé à : {end_time_str} - Durée d'exécution : {duration:.2f} secondes")
 
-        logger.info("[SAGA] Fin de main_saga_ground_extraction")
+        logger.debug("[SAGA] Fin de main_saga_ground_extraction")
 #==================================================================================================
 # Gestion des exceptions
 #==================================================================================================
@@ -578,40 +586,39 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
     
     try:
 
-        logger.info("[SAGA] Démarrage de main_saga_ground_extraction")
+        logger.debug("[SAGA] Démarrage de main_saga_ground_extraction")
 
         # Enregistrer l'heure de départ
         start_time = time.time()
         start_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(start_time))
-        logger.info(f"[SAGA] Programme démarré à : {start_time_str}")
+        logger.debug(f"[SAGA] Programme démarré à : {start_time_str}")
         
         # parametres du programme
-        logger.info(f"[SAGA] PARAMETRAGE: mns={chem_mns}, out={chem_out_final}, RepTra={RepTra}, rayon={rayon}, taille_dallage={taille_dallage}, cpu={iNbreCPU}")        
+        logger.debug(f"[SAGA] PARAMETRAGE: mns={chem_mns}, out={chem_out_final}, RepTra={RepTra}, rayon={rayon}, taille_dallage={taille_dallage}, cpu={iNbreCPU}")        
         
         RepTra_tmp=os.path.join(RepTra,"tmp")
         if not os.path.isdir(RepTra): os.mkdir(RepTra)
         if not os.path.isdir(RepTra_tmp): os.mkdir(RepTra_tmp)
 
-        #
+        # Éviter de réutiliser d'anciennes dalles (ex. run L puis S dans le même RepTra)
         RepTra_DALLAGE_tmp=os.path.join(RepTra_tmp,"DALLAGE")
-        if not os.path.isdir(RepTra_DALLAGE_tmp): os.mkdir(RepTra_DALLAGE_tmp)
-        
+        RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
+        reset_dir(RepTra_DALLAGE_tmp)
+        reset_dir(RepTra_OUT_SAGA_tmp)
+
         #
-        logger.info(f"BEGIN Dallage du Chantier avec rasterio")
+        logger.debug(f"BEGIN Dallage du Chantier avec rasterio")
         Decouper_image_en_dalles(chem_mns, taille_dallage, RepTra_DALLAGE_tmp, 'DALLAGE_')
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes") 
+        logger.debug(f"FIN Dallage du Chantier avec rasterio - Durée d'exécution : {duration_tmp:.2f} secondes") 
 
         #
-        RepTra_OUT_SAGA_tmp=os.path.join(RepTra_tmp,"OUT_SAGA_tmp")
-        if not os.path.isdir(RepTra_OUT_SAGA_tmp): os.mkdir(RepTra_OUT_SAGA_tmp)
-        #
-        logger.info(f"BEGIN RUN de SAGA par dalle en parallèle")
+        logger.debug(f"BEGIN RUN de SAGA par dalle en parallèle")
         run_saga_par_dalle_parallel(RepTra_DALLAGE_tmp,RepTra_OUT_SAGA_tmp,rayon,no_data_ext,pente,iNbreCPU)
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"FIN RUN de SAGA par dalle en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
 
         RepTra_OUT_SAGA_tmp_expand = os.path.expanduser(RepTra_OUT_SAGA_tmp)
         chem_out_final_tmp=os.path.join(RepTra_tmp,'out_final_tmp.tif')
@@ -626,7 +633,7 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
                     chem_out = f"{chem_in[:-5]}.tif"
                     cmd = f"gdal_translate {chem_in} {chem_out}"
                     tasks_gdal.append(cmd)
-                    logger.info(cmd)
+                    logger.debug(cmd)
         
         # Utiliser le Pool de multiprocessing
         # Utiliser imap_unordered pour traiter les commandes en parallèle
@@ -636,7 +643,7 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
 
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"FIN Conversion des .sdat de SAGA en .tif en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"FIN Conversion des .sdat de SAGA en .tif en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
 
         RepTra_raboutage_tmp=os.path.join(RepTra_OUT_SAGA_tmp,'RABOUTAGE_tmp')
 
@@ -646,7 +653,7 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
         else:
             shutil.rmtree(RepTra_raboutage_tmp)
             os.mkdir(RepTra_raboutage_tmp)
-        logger.info(f"RepTra_raboutage_tmp : {RepTra_raboutage_tmp}")
+        logger.debug(f"RepTra_raboutage_tmp : {RepTra_raboutage_tmp}")
 
         RepTra_raboutage_tmp_expand=  os.path.expanduser(RepTra_raboutage_tmp)
 
@@ -658,7 +665,7 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
         
         time_tmp = time.time()
         duration_tmp = time_tmp - start_time
-        logger.info(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
+        logger.debug(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
         #print(f"[SAGA] FIN Assemblage des ground.tif par paquet, avec gdal_merge, en // - Durée d'exécution : {duration_tmp:.2f} secondes")  
         #
         chem_out_final_expand  = os.path.expanduser(chem_out_final)
@@ -669,9 +676,9 @@ def main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayo
         end_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(end_time))
         # Calculer la durée
         duration = end_time - start_time
-        logger.info(f"[SAGA] END - Programme terminé à : {end_time_str} - Durée d'exécution : {duration:.2f} secondes")
+        logger.debug(f"[SAGA] END - Programme terminé à : {end_time_str} - Durée d'exécution : {duration:.2f} secondes")
 
-        logger.info("[SAGA] Fin de main_saga_ground_extraction")
+        logger.debug("[SAGA] Fin de main_saga_ground_extraction")
 #==================================================================================================
 # Gestion des exceptions
 #==================================================================================================
@@ -703,7 +710,7 @@ if __name__ == "__main__":
     logger.add(log_file_path, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
     start_time = time.time()
     start_time_str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime(start_time))
-    logger.info(f"Programme main_saga_ground_extraction démarré à : {start_time_str}")
+    logger.debug(f"Programme main_saga_ground_extraction démarré à : {start_time_str}")
         
     main_saga_ground_extraction(chem_mns, chem_out_final, RepTra, iNbreCPU, rayon, taille_dallage, no_data_ext)
         
@@ -715,6 +722,6 @@ if __name__ == "__main__":
     formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 
     # Afficher le temps total de traitement
-    logger.info(f"Temps total de traitement dans main_saga_ground_extraction: {formatted_time}")       
+    logger.debug(f"Temps total de traitement dans main_saga_ground_extraction: {formatted_time}")       
 		
-    logger.info("END main_saga_ground_extraction")        
+    logger.debug("END main_saga_ground_extraction")        

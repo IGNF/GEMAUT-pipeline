@@ -43,7 +43,7 @@ class PDALIntegration(GroundExtractionInterface):
         try:
             # Essayer d'abord la vraie pipeline PDAL
             if self._check_pdal_available():
-                logger.info("PDAL détecté - utilisation de la vraie pipeline PDAL")
+                logger.debug("PDAL détecté - utilisation de la vraie pipeline PDAL")
                 self.compute_mask_with_pdal_pipeline(mns_file, output_mask_file, work_dir, params)
             else:
                 logger.warning("PDAL non disponible - création d'un masque par défaut")
@@ -71,7 +71,7 @@ class PDALIntegration(GroundExtractionInterface):
             output_mask_file: Fichier de sortie du masque binaire
             params: Paramètres de configuration
         """
-        logger.info("🚀 Démarrage de l'extraction avec la vraie pipeline PDAL")
+        logger.debug("Démarrage de l'extraction avec la vraie pipeline PDAL")
         start_time = time.time()
         
         # Créer le répertoire de travail
@@ -93,10 +93,10 @@ class PDALIntegration(GroundExtractionInterface):
             # Conserver le JSON de la pipeline pour inspection
             output_json = os.path.join(work_dir, "pdal_pipeline_used.json")
             shutil.copy2(pipeline_file, output_json)
-            logger.info(f"📄 Pipeline JSON sauvegardé: {output_json}")
+            logger.debug(f"Pipeline JSON sauvegardé: {output_json}")
             
             # Exécuter la pipeline PDAL
-            logger.info("⚡ Exécution de la pipeline PDAL...")
+            logger.debug("Exécution de la pipeline PDAL...")
             cmd = ['pdal', 'pipeline', pipeline_file]
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             
@@ -112,15 +112,15 @@ class PDALIntegration(GroundExtractionInterface):
             shutil.move(output_mask_file, pdal_raw_mask)
             
             # Appliquer le resampling pour correspondre aux dimensions du MNS d'entrée
-            logger.info("🔄 Application du resampling pour correspondre aux dimensions du MNS...")
+            logger.debug("Application du resampling pour correspondre aux dimensions du MNS...")
             self.resample_mask_to_mns_dimensions(pdal_raw_mask, mns_file, output_mask_file)
             
             # Calculer la taille du fichier final
             file_size = os.path.getsize(output_mask_file) / (1024 * 1024)  # MB
             
             elapsed_time = time.time() - start_time
-            logger.info(f"✅ PDAL: Extraction et resampling réussis en {elapsed_time:.2f}s")
-            logger.info(f"📁 Fichier final créé: {output_mask_file} ({file_size:.2f} MB)")
+            logger.debug(f"PDAL: Extraction et resampling réussis en {elapsed_time:.2f}s")
+            logger.debug(f"Fichier final créé: {output_mask_file} ({file_size:.2f} MB)")
             
         except subprocess.CalledProcessError as e:
             logger.error(f"❌ Erreur lors de l'exécution PDAL: {e}")
@@ -234,7 +234,7 @@ class PDALIntegration(GroundExtractionInterface):
             mns_file: Fichier MNS de référence
             output_mask: Fichier de sortie du masque
         """
-        logger.info("🔄 Création d'un masque par défaut...")
+        logger.debug("Création d'un masque par défaut...")
         
         with rasterio.open(mns_file) as src:
             data = src.read(1)
@@ -254,7 +254,7 @@ class PDALIntegration(GroundExtractionInterface):
                 dst.write(mask.astype(np.uint8), 1)
                 dst.nodata = 255
         
-        logger.info("✅ Masque par défaut créé")
+        logger.debug("Masque par défaut créé")
     
     def cleanup(self):
         """Nettoie les fichiers temporaires"""
@@ -273,7 +273,7 @@ class PDALIntegration(GroundExtractionInterface):
             result = subprocess.run(['pdal', '--version'],
                                   capture_output=True, text=True, check=False)
             if result.returncode == 0:
-                logger.info("PDAL détecté et fonctionnel")
+                logger.debug("PDAL détecté et fonctionnel")
                 return True
             else:
                 logger.warning("PDAL non disponible")
@@ -326,20 +326,20 @@ class PDALIntegration(GroundExtractionInterface):
     
     def log_environment(self) -> None:
         """Enregistre les informations sur l'environnement PDAL"""
-        logger.info("=== Informations environnement PDAL ===")
+        logger.debug("=== Informations environnement PDAL ===")
         
         # Version PDAL
         pdal_version = self.get_version()
-        logger.info(f"PDAL version: {pdal_version}")
+        logger.debug(f"PDAL version: {pdal_version}")
         
         # Dépendances
         dependencies = self.check_dependencies()
-        logger.info("Dépendances PDAL:")
+        logger.debug("Dépendances PDAL:")
         for dep, available in dependencies.items():
             status = "✓" if available else "✗"
-            logger.info(f"  {status} {dep}")
+            logger.debug(f"  {status} {dep}")
         
-        logger.info("=======================================")
+        logger.debug("=======================================")
     
     def get_required_params(self) -> list:
         """Retourne la liste des paramètres requis pour PDAL"""
@@ -354,7 +354,7 @@ class PDALIntegration(GroundExtractionInterface):
             mns_file: Chemin vers le MNS d'entrée (référence pour les dimensions)
             output_file: Chemin de sortie pour le masque resamplé
         """
-        logger.info("🔄 Sur-échantillonnage du masque PDAL aux dimensions du MNS...")
+        logger.debug("Sur-échantillonnage du masque PDAL aux dimensions du MNS...")
         
         try:
             # Lire le MNS d'entrée pour récupérer les métadonnées
@@ -366,8 +366,8 @@ class PDALIntegration(GroundExtractionInterface):
                 mns_resolution_x = mns_src.res[0]
                 mns_resolution_y = mns_src.res[1]
                 
-                logger.info(f"📐 MNS d'entrée: {mns_width}x{mns_height} pixels")
-                logger.info(f"📍 Résolution MNS: {mns_resolution_x:.3f}m x {mns_resolution_y:.3f}m")
+                logger.debug(f"MNS d'entrée: {mns_width}x{mns_height} pixels")
+                logger.debug(f"Résolution MNS: {mns_resolution_x:.3f}m x {mns_resolution_y:.3f}m")
             
             # Lire le masque PDAL
             with rasterio.open(pdal_mask_file) as mask_src:
@@ -377,13 +377,13 @@ class PDALIntegration(GroundExtractionInterface):
                 mask_crs = mask_src.crs
                 mask_transform = mask_src.transform
                 
-                logger.info(f"📐 Masque PDAL: {mask_width}x{mask_height} pixels")
-                logger.info(f"📍 Résolution masque: {mask_src.res[0]:.3f}m x {mask_src.res[1]:.3f}m")
+                logger.debug(f"Masque PDAL: {mask_width}x{mask_height} pixels")
+                logger.debug(f"Résolution masque: {mask_src.res[0]:.3f}m x {mask_src.res[1]:.3f}m")
             
             # Vérifier que les CRS sont compatibles
             if mns_crs != mask_crs:
                 logger.warning(f"⚠️ CRS différents: MNS={mns_crs}, Masque={mask_crs}")
-                logger.info("🔄 Reprojection du masque vers le CRS du MNS...")
+                logger.debug("Reprojection du masque vers le CRS du MNS...")
                 
                 # Reprojeter le masque vers le CRS du MNS
                 from rasterio.warp import reproject, Resampling
@@ -404,14 +404,14 @@ class PDALIntegration(GroundExtractionInterface):
                 )
                 
                 mask_data = reprojected_mask
-                logger.info("✅ Reprojection terminée")
+                logger.debug("Reprojection terminée")
             
             # Si les dimensions sont déjà identiques, pas besoin de resampling
             if mns_width == mask_width and mns_height == mask_height:
-                logger.info("✅ Les dimensions sont déjà identiques, pas de resampling nécessaire")
+                logger.debug("Les dimensions sont déjà identiques, pas de resampling nécessaire")
                 mask_data_resampled = mask_data
             else:
-                logger.info("🔄 Resampling du masque aux dimensions du MNS...")
+                logger.debug("Resampling du masque aux dimensions du MNS...")
                 
                 # Utiliser scipy pour le resampling avec interpolation nearest neighbor
                 from scipy.ndimage import zoom
@@ -420,7 +420,7 @@ class PDALIntegration(GroundExtractionInterface):
                 zoom_x = mns_width / mask_width
                 zoom_y = mns_height / mask_height
                 
-                logger.info(f"🔍 Facteurs de zoom: X={zoom_x:.3f}, Y={zoom_y:.3f}")
+                logger.debug(f"Facteurs de zoom: X={zoom_x:.3f}, Y={zoom_y:.3f}")
                 
                 # Resampling avec interpolation nearest neighbor pour préserver les valeurs binaires
                 mask_data_resampled = zoom(mask_data, (zoom_y, zoom_x), order=0, mode='nearest')
@@ -442,7 +442,7 @@ class PDALIntegration(GroundExtractionInterface):
                         padding_x = mns_width - mask_data_resampled.shape[1]
                         mask_data_resampled = np.pad(mask_data_resampled, ((0, 0), (0, padding_x)), mode='constant', constant_values=0)
                 
-                logger.info(f"✅ Resampling terminé: {mask_data_resampled.shape}")
+                logger.debug(f"Resampling terminé: {mask_data_resampled.shape}")
             
             # Écrire le masque resamplé
             with rasterio.open(
@@ -460,17 +460,20 @@ class PDALIntegration(GroundExtractionInterface):
             
             # Vérifier le résultat
             file_size = os.path.getsize(output_file) / (1024 * 1024)  # MB
-            logger.info(f"✅ Masque resamplé créé: {output_file} ({file_size:.2f} MB)")
-            logger.info(f"📐 Dimensions finales: {mns_width}x{mns_height} pixels")
+            logger.debug(f"Masque resamplé créé: {output_file} ({file_size:.2f} MB)")
+            logger.debug(f"Dimensions finales: {mns_width}x{mns_height} pixels")
             
             # Statistiques du masque
             unique_values, counts = np.unique(mask_data_resampled, return_counts=True)
             total_pixels = mns_width * mns_height
-            logger.info("📊 Statistiques du masque resamplé:")
+            parts = []
             for val, count in zip(unique_values, counts):
                 percentage = (count / total_pixels) * 100
                 label = "Sol" if val == 0 else "Sursol" if val == 1 else f"Valeur {val}"
-                logger.info(f"  {label}: {count:,} pixels ({percentage:.1f}%)")
+                parts.append(f"{label} {percentage:.1f}%")
+                logger.debug(f"  {label}: {count:,} pixels ({percentage:.1f}%)")
+            if parts:
+                logger.debug("        " + " | ".join(parts))
             
         except Exception as e:
             logger.error(f"❌ Erreur lors du resampling du masque: {e}")
