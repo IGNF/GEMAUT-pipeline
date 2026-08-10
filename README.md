@@ -17,7 +17,7 @@ Si vous utilisez GEMAUT dans vos travaux, merci de citer cette publication.
 
 ## ✨ Nouvelles fonctionnalités
 
-- **⚙️ Calcul automatique de masques** si `--masque` / `mask_file` n'est pas fourni
+- **⚙️ Calcul automatique de masques** si `--masque` n'est pas fourni
 - **🎯 Choix de méthode** : PDAL (par défaut) ou SAGA avec `--mask-method`
 - **📋 Configuration simplifiée** : Utilisation d'un fichier de configuration YAML
 - **🧪 Tests unitaires complets** : Suite de tests automatisés pour validation
