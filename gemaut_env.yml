@@ -27,7 +27,7 @@ dependencies:
   - suitesparse
   - tbb-devel
   - pkg-config
-  # OpenCV 5 supprime l'API C legacy ; GEMO utilise l'API C++ moderne (compatible 4.x)
+  # OpenCV 5 supprime l'API C legacy ; 
   - libopencv>=4.5,<5
   - opencv>=4.5,<5
   - py-opencv>=4.5,<5
