@@ -48,12 +48,6 @@ conda deactivate && conda activate gemaut_env
 pip install .
 ```
 
-> **Environnement reproductible** : si la création avec `gemaut_env.yml` échoue
-> (conflits de versions conda-forge), utilisez l’environnement figé validé :
-> ```bash
-> conda env create -f gemaut_env.lock.yml
-> ```
-
 ### Méthode alternative : Script bash complet
 
 ```bash
