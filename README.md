@@ -9,9 +9,7 @@
 
 ## 📖 Description / Publication
 
-GEMAUT est décrit en détail dans cette article publié dans la *Revue Française de Photogrammétrie et de Télédétection (RFPT)* :
-
-> 👉 [Lire l'article sur le site de la RFPT](https://rfpt.sfpt.fr/index.php/RFPT/article/view/739)
+GEMAUT est décrit en détail dans cet [article](https://rfpt.sfpt.fr/index.php/RFPT/article/view/739) publié dans la *Revue Française de Photogrammétrie et de Télédétection (RFPT)* :
 
 Si vous utilisez GEMAUT dans vos travaux, merci de citer cette publication.
 
@@ -25,8 +23,6 @@ Si vous utilisez GEMAUT dans vos travaux, merci de citer cette publication.
 ---
 
 ## 🏗️ Installation
-
-### Méthode recommandée : Installation via pip
 
 ```bash
 # Cloner le dépôt
@@ -45,21 +41,6 @@ conda deactivate && conda activate gemaut_env
 
 # 3. Installer GEMAUT
 pip install .
-```
-
-### Méthode alternative : Script bash complet
-
-```bash
-# Cloner le dépôt
-git clone https://github.com/IGNF/GEMAUT-pipeline.git
-cd GEMAUT-pipeline
-
-# Créer l'environnement conda & l'activer
-conda env create -f gemaut_env.yml
-conda activate gemaut_env
-
-# Lancer l'installation complète
-./scripts/install_gemaut.sh
 ```
 
 📖 **Pour plus de détails**, consultez [docs/INSTALL.md](docs/INSTALL.md)
